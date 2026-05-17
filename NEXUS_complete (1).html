@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NEXUS — Life Command Center</title>
+<meta name="theme-color" content="#05050c"/>
+<meta name="description" content="Your personal life, goals, dreams & finance management dashboard"/>
+<style>
+/* =====================================================
+   NEXUS — Complete Single-File PWA
+   Theme: Black · Blue (#0047FF) · Pink (#FF0080)
+===================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+:root{
+  --bg:#05050c;--bg-2:#09090f;--bg-3:#0e0e1a;
+  --blue:#0047FF;--blue-mid:#2d65ff;--blue-light:#6690ff;
+  --blue-dim:rgba(0,71,255,0.12);--blue-glow:rgba(0,71,255,0.45);
+  --pink:#FF0080;--pink-mid:#ff338e;--pink-light:#ff66b0;
+  --pink-dim:rgba(255,0,128,0.12);--pink-glow:rgba(255,0,128,0.45);
+  --white:#fff;--text-1:rgba(255,255,255,0.94);--text-2:rgba(255,255,255,0.62);
+  --text-3:rgba(255,255,255,0.34);--glass:rgba(255,255,255,0.035);
+  --glass-hov:rgba(255,255,255,0.065);--border:rgba(255,255,255,0.07);
+  --success:#00e07a;--warning:#ffaa00;--danger:#ff2d55;--gold:#FFD700;
+  --radius-s:8px;--radius-m:14px;--radius-l:20px;--radius-xl:28px;--radius-p:999px;
+  --ease:cubic-bezier(0.4,0,0.2,1);--T:all .28s var(--ease);--T-slow:all .55s var(--ease);
+  --font-d:'Orbitron',monospace;
+  --font-b:'Patrick Hand','Comic Sans MS',cursive;
+  --font-m:'JetBrains Mono','Courier New',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:'Patrick Hand','Comic Sans MS',cursive!important}
+html{scroll-behavior:smooth}
+body{font-family:'Patrick Hand','Comic Sans MS',cursive!important;background:var(--bg);color:var(--text-1);min-height:100vh;overflow-x:hidden;letter-spacing:0;font-size:15px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+/* Only logo/monospace keep their special fonts */
+.fam-d,.island-logo,.login-logo,.card-price,.fin-item span,.stat-val,.big-salary,.cd-val,.im-avatar,.island-avatar{font-family:'Orbitron',cursive!important}
+.fam-m,.island-time,.card-price{font-family:'Patrick Hand',cursive!important}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font-b);cursor:pointer}
+input,select,textarea{font-family:var(--font-b)}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 90% 60% at 15% -10%,rgba(0,71,255,.13) 0%,transparent 65%),
+  radial-gradient(ellipse 70% 50% at 85% 110%,rgba(255,0,128,.11) 0%,transparent 60%);
+  pointer-events:none;animation:bgPulse 12s ease-in-out infinite alternate}
+body::after{content:'';position:fixed;inset:0;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(255,255,255,0.018)' stroke-width='1'/%3E%3C/svg%3E");
+  pointer-events:none}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px}
+.particles{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.particle{position:absolute;border-radius:50%;animation:particleRise linear infinite}
+
+/* DYNAMIC ISLAND */
+.dynamic-island{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;
+  background:rgba(6,6,14,.97);backdrop-filter:blur(40px) saturate(180%);
+  border:1px solid var(--border);border-radius:var(--radius-p);padding:10px 22px;
+  display:flex;align-items:center;gap:16px;
+  min-width:320px;max-width:560px;
+  transition:var(--T-slow);cursor:pointer;
+  box-shadow:0 0 0 1px rgba(0,71,255,.08),0 24px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.04)}
+.dynamic-island:hover{border-color:rgba(0,71,255,.3);box-shadow:0 0 0 1px rgba(0,71,255,.2),0 24px 70px rgba(0,0,0,.7),0 0 40px rgba(0,71,255,.1),inset 0 1px 0 rgba(255,255,255,.07);transform:translateX(-50%) scale(1.01)}
+.dynamic-island.menu-open{border-color:rgba(0,71,255,.4);box-shadow:0 0 0 1px rgba(0,71,255,.3),0 0 50px rgba(0,71,255,.15)}
+.island-logo{font-family:var(--font-d);font-size:13px;font-weight:900;letter-spacing:.22em;
+  background:linear-gradient(135deg,var(--blue-mid),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;flex-shrink:0}
+.island-indicator{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);flex-shrink:0;animation:breathe 3s ease-in-out infinite}
+.island-center-hint{flex:1;text-align:center;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);font-weight:500;transition:var(--T)}
+.dynamic-island:hover .island-center-hint{color:var(--text-2)}
+.island-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.island-time{font-family:var(--font-m);font-size:11px;color:var(--text-3)}
+.island-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--pink));display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:10px;font-weight:700;box-shadow:0 0 12px var(--blue-glow)}
+
+/* ISLAND MENU */
+.island-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:998;opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+.island-menu-overlay.open{opacity:1;pointer-events:all}
+.island-menu{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-12px);z-index:999;
+  width:min(480px,calc(100vw - 32px));max-height:calc(100vh - 90px);
+  background:rgba(8,8,18,.98);backdrop-filter:blur(50px);
+  border:1px solid rgba(0,71,255,.2);border-radius:var(--radius-xl);
+  overflow-y:auto;overflow-x:hidden;opacity:0;pointer-events:none;
+  transition:all .35s var(--ease);
+  box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(0,71,255,.1),0 0 60px rgba(0,71,255,.08)}
+.island-menu.open{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+.island-menu-top{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.im-user{display:flex;align-items:center;gap:12px}
+.im-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--pink));display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:14px;font-weight:700;flex-shrink:0;box-shadow:0 0 16px var(--blue-glow)}
+.im-name{font-weight:700;font-size:15px;letter-spacing:-.01em}
+.im-sub{font-size:11px;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.island-menu-nav{padding:10px 10px}
+.im-nav-item{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:var(--radius-m);cursor:pointer;transition:var(--T);color:var(--text-2);font-size:14px;font-weight:500}
+.im-nav-item:hover{background:rgba(0,71,255,.1);color:var(--white);border:none}
+.im-nav-item.active{background:var(--blue-dim);color:var(--white);border:1px solid rgba(0,71,255,.3)}
+.im-icon{font-size:16px;width:32px;height:32px;border-radius:var(--radius-s);background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-style:normal;transition:var(--T)}
+.im-nav-item:hover .im-icon{background:var(--blue-dim);border-color:rgba(0,71,255,.4)}
+.im-arrow{margin-left:auto;color:var(--text-3);font-size:18px;transition:var(--T)}
+.im-nav-item:hover .im-arrow{color:var(--blue-light);transform:translateX(3px)}
+.island-menu-fin{padding:14px 20px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.im-fin-row{display:flex;justify-content:space-between;align-items:center}
+
+/* PAGE */
+.page-wrapper{min-height:100vh;padding:86px 24px 80px;position:relative;z-index:1;max-width:1400px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:10px}
+.section-title::before{content:'';width:24px;height:2px;background:linear-gradient(90deg,var(--blue),var(--pink));border-radius:1px}
+
+/* CARDS */
+.card{background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--radius-l);padding:22px;transition:var(--T);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.card:hover{border-color:rgba(0,71,255,.25);background:var(--glass-hov);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.5),0 0 30px rgba(0,71,255,.08)}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:20px 22px;display:flex;flex-direction:column;gap:6px;transition:var(--T);animation:fadeUp .6s var(--ease) both}
+.stat-card:hover{transform:translateY(-3px);border-color:rgba(0,71,255,.25);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.stat-label{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3)}
+.stat-val{font-family:var(--font-d);font-size:30px;font-weight:800;line-height:1}
+.stat-val.blue{background:linear-gradient(135deg,var(--blue-mid),var(--blue-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-val.pink{background:linear-gradient(135deg,var(--pink),var(--pink-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-val.gold{color:var(--gold)}.stat-val.green{color:var(--success)}
+.stat-sub{font-size:11px;color:var(--text-3)}.stat-sub.up{color:var(--success)}.stat-sub.down{color:var(--danger)}
+.item-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:18px 20px;transition:var(--T);position:relative;overflow:hidden;animation:fadeUp .5s var(--ease) both}
+.item-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--pink));opacity:0;transition:var(--T)}
+.item-card:hover{border-color:rgba(0,71,255,.3);background:var(--glass-hov);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.45)}
+.item-card:hover::after{opacity:1}
+.item-card.achieved{opacity:.55}.item-card.achieved::after{background:var(--success);opacity:1}
+.card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.cat-icon{width:38px;height:38px;border-radius:var(--radius-m);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.card-title{font-family:var(--font-d);font-size:13px;font-weight:700;letter-spacing:.05em;line-height:1.3}
+.card-cat{font-size:10px;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.card-actions{display:flex;gap:6px;margin-left:auto}
+.card-desc{font-size:12px;color:var(--text-2);margin-bottom:12px;line-height:1.5}
+.card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-price{font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--gold)}
+.card-date{font-size:10px;color:var(--text-3)}
+
+/* COUNTDOWN */
+.countdown{display:flex;align-items:center;gap:6px}
+.cd-block{text-align:center}
+.cd-val{font-family:var(--font-m);font-size:16px;font-weight:700;color:var(--blue-light);display:block;line-height:1}
+.cd-lbl{font-size:7px;letter-spacing:.1em;color:var(--text-3);text-transform:uppercase}
+.cd-sep{font-family:var(--font-m);color:var(--text-3);font-size:14px;line-height:1}
+.overdue-badge{background:rgba(255,45,85,.15);color:var(--danger);border:1px solid rgba(255,45,85,.3);padding:3px 8px;border-radius:var(--radius-p);font-size:10px;font-weight:700;letter-spacing:.08em}
+.done-badge{background:rgba(0,224,122,.15);color:var(--success);border:1px solid rgba(0,224,122,.3);padding:3px 8px;border-radius:var(--radius-p);font-size:10px;font-weight:700;letter-spacing:.08em}
+
+/* TIMELINE */
+.tl-label{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-d);font-size:9px;letter-spacing:.25em;text-transform:uppercase;padding:6px 14px;border-radius:var(--radius-p);margin-bottom:14px}
+.tl-short{background:rgba(0,224,122,.08);color:var(--success);border:1px solid rgba(0,224,122,.2)}
+.tl-long{background:var(--blue-dim);color:var(--blue-light);border:1px solid rgba(0,71,255,.25)}
+.tl-future{background:var(--pink-dim);color:var(--pink-light);border:1px solid rgba(255,0,128,.25)}
+.tl-overdue{background:rgba(255,45,85,.08);color:var(--danger);border:1px solid rgba(255,45,85,.2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-m);font-family:var(--font-b);font-size:13px;font-weight:600;letter-spacing:.06em;border:none;cursor:pointer;transition:var(--T);white-space:nowrap}
+.btn-primary{background:var(--blue);color:white;box-shadow:0 4px 20px rgba(0,71,255,.35)}
+.btn-primary:hover{background:var(--blue-mid);box-shadow:0 6px 28px rgba(0,71,255,.55);transform:translateY(-1px)}
+.btn-pink{background:var(--pink);color:white;box-shadow:0 4px 20px rgba(255,0,128,.35)}
+.btn-pink:hover{background:var(--pink-mid);box-shadow:0 6px 28px rgba(255,0,128,.55);transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);color:var(--text-2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--glass-hov);color:var(--white);border-color:var(--blue)}
+.btn-danger{background:rgba(255,45,85,.15);color:var(--danger);border:1px solid rgba(255,45,85,.3)}
+.btn-danger:hover{background:rgba(255,45,85,.25)}
+.btn-success{background:rgba(0,224,122,.15);color:var(--success);border:1px solid rgba(0,224,122,.3)}
+.btn-success:hover{background:rgba(0,224,122,.25)}
+.btn-sm{padding:6px 14px;font-size:11px;border-radius:var(--radius-s);gap:5px}
+.btn-lg{padding:14px 30px;font-size:15px;border-radius:var(--radius-l)}
+.btn-icon{padding:8px;width:32px;height:32px;border-radius:var(--radius-s);justify-content:center;font-size:14px}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
+.form-control{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius-m);padding:11px 14px;color:var(--text-1);font-family:var(--font-b);font-size:14px;transition:var(--T);width:100%;appearance:none}
+.form-control::placeholder{color:var(--text-3)}
+.form-control:focus{outline:none;border-color:var(--blue);background:rgba(0,71,255,.04);box-shadow:0 0 0 3px rgba(0,71,255,.10)}
+.form-control option{background:var(--bg-3)}
+textarea.form-control{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* PROGRESS */
+.progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--pink));border-radius:2px;transition:width 1.2s var(--ease)}
+
+/* TABS */
+.tab-nav{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-m);padding:4px;width:fit-content}
+.tab-btn{padding:7px 16px;border-radius:var(--radius-s);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--text-3);cursor:pointer;border:none;background:transparent;transition:var(--T);font-family:var(--font-b);text-transform:uppercase}
+.tab-btn.active{background:var(--blue);color:white;box-shadow:0 0 14px rgba(0,71,255,.4)}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);z-index:900;opacity:0;pointer-events:none;transition:opacity .35s ease}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(480px,100vw);background:var(--bg-2);border-left:1px solid var(--border);z-index:901;padding:28px;overflow-y:auto;transform:translateX(100%);transition:var(--T-slow)}
+.drawer.open{transform:translateX(0)}
+.drawer-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.drawer-title{font-family:var(--font-d);font-size:14px;font-weight:700;letter-spacing:.08em}
+.drawer-body{display:flex;flex-direction:column;gap:16px}
+
+/* FINANCIAL BAR */
+.fin-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(4,4,12,.97);backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 28px;z-index:500;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.fin-item{display:flex;flex-direction:column;gap:1px}
+.fin-item label{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-3);font-weight:700}
+.fin-item span{font-family:var(--font-m);font-size:13px;color:var(--gold);font-weight:700}
+.fin-divider{width:1px;height:28px;background:var(--border)}
+.fin-spacer{flex:1}
+
+/* TOAST */
+.toast{position:fixed;bottom:70px;right:24px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-m);padding:12px 18px;z-index:2000;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;transform:translateX(120px);opacity:0;transition:all .35s var(--ease);max-width:320px}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.success{border-color:var(--success);color:var(--success)}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.info{border-color:var(--blue);color:var(--blue-light)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:var(--radius-p);font-size:10px;font-weight:700;letter-spacing:.06em}
+.badge-blue{background:var(--blue-dim);color:var(--blue-light);border:1px solid rgba(0,71,255,.25)}
+.badge-pink{background:var(--pink-dim);color:var(--pink-light);border:1px solid rgba(255,0,128,.25)}
+.badge-green{background:rgba(0,224,122,.1);color:var(--success);border:1px solid rgba(0,224,122,.2)}
+.badge-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25)}
+
+/* GRIDS */
+.g1{display:grid;grid-template-columns:1fr;gap:14px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* UTILS */
+.flex{display:flex}.flex-c{display:flex;align-items:center}.flex-b{display:flex;align-items:center;justify-content:space-between}.flex-col{display:flex;flex-direction:column}
+.gap4{gap:4px}.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}.gap20{gap:20px}.gap24{gap:24px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}.mb24{margin-bottom:24px}.mb32{margin-bottom:32px}
+.mt-auto{margin-top:auto}.w-full{width:100%}.hidden{display:none!important}.text-c{text-align:center}.text-r{text-align:right}
+.text-muted{color:var(--text-3)}.text-blue{color:var(--blue-light)}.text-pink{color:var(--pink-light)}.text-gold{color:var(--gold);font-family:var(--font-m)}.text-green{color:var(--success)}.text-red{color:var(--danger)}
+.text-sm{font-size:12px}.text-xs{font-size:11px}.fw6{font-weight:600}.fw7{font-weight:700}.fam-d{font-family:var(--font-d)}.fam-m{font-family:var(--font-m)}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.empty{text-align:center;padding:48px 20px;color:var(--text-3)}
+.empty-icon{font-size:44px;display:block;margin-bottom:12px;opacity:.5}
+.empty-text{font-size:13px;line-height:1.6}
+
+/* LOGIN */
+.login-bg{position:fixed;inset:0;overflow:hidden;z-index:1}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:orbFloat ease-in-out infinite alternate}
+.orb1{width:520px;height:520px;top:-120px;left:-100px;background:radial-gradient(circle,rgba(0,71,255,.6),transparent 70%);animation-duration:11s}
+.orb2{width:400px;height:400px;bottom:-80px;right:-80px;background:radial-gradient(circle,rgba(255,0,128,.5),transparent 70%);animation-duration:14s;animation-delay:2s}
+.orb3{width:280px;height:280px;top:40%;left:40%;background:radial-gradient(circle,rgba(0,50,200,.3),transparent 70%);animation-duration:9s;animation-delay:1s}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;z-index:2}
+.login-card{width:100%;max-width:440px;background:rgba(8,8,18,.92);backdrop-filter:blur(50px);border:1px solid var(--border);border-radius:var(--radius-xl);padding:44px 40px;animation:fadeUp .8s var(--ease) both;position:relative}
+.login-card::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius-xl);z-index:-1;background:linear-gradient(135deg,rgba(0,71,255,.25),rgba(0,0,0,0),rgba(255,0,128,.2))}
+.login-logo{font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.3em;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,var(--blue-mid),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-tagline{text-align:center;font-size:12px;color:var(--text-3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:36px}
+.login-tabs{display:flex;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-m);padding:4px;margin-bottom:28px}
+.login-tab{flex:1;padding:9px;text-align:center;border-radius:var(--radius-s);font-size:12px;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:var(--T);color:var(--text-3);border:none;background:transparent;font-family:var(--font-b);text-transform:uppercase}
+.login-tab.active{background:var(--blue);color:white;box-shadow:0 0 14px rgba(0,71,255,.4)}
+.brand-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
+.brand-diamond{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--pink));clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);animation:spin 8s linear infinite}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:breathe 3s ease-in-out infinite;flex-shrink:0}
+.pw-wrap{position:relative}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-3);cursor:pointer;font-size:16px;transition:var(--T);padding:4px}
+.pw-toggle:hover{color:var(--text-1)}
+.strength-bar{height:3px;border-radius:2px;overflow:hidden;margin-top:6px;display:flex;gap:3px}
+.sb-seg{flex:1;border-radius:2px;background:var(--border);transition:background .3s}
+.submit-btn{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--blue),var(--blue-mid));border:none;border-radius:var(--radius-m);color:white;font-family:var(--font-b);font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:14px;width:100%;cursor:pointer;transition:var(--T);margin-top:4px;box-shadow:0 6px 24px rgba(0,71,255,.4)}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(0,71,255,.55)}
+.submit-btn.loading{pointer-events:none;opacity:.7}
+.login-error{background:rgba(255,45,85,.08);border:1px solid rgba(255,45,85,.25);color:var(--danger);border-radius:var(--radius-m);padding:10px 14px;font-size:12px;display:none}
+.login-error.show{display:block;animation:fadeUp .3s var(--ease)}
+.feature-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:20px}
+.f-pill{display:inline-flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-p);padding:5px 10px;font-size:10px;color:var(--text-3);letter-spacing:.05em}
+
+/* HABITS */
+.habit-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:18px 20px;transition:var(--T);animation:fadeUp .5s var(--ease) both;position:relative;overflow:hidden}
+.habit-card:hover{border-color:rgba(0,71,255,.3);background:var(--glass-hov);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.4)}
+.habit-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--pink));opacity:0;transition:var(--T)}
+.habit-card:hover::after,.habit-card.done-today::after{opacity:1}
+.habit-card.done-today{border-color:rgba(0,224,122,.25)}.habit-card.done-today::after{background:var(--success)}
+.week-dots{display:flex;gap:5px;margin:12px 0}
+.wd{width:26px;height:26px;border-radius:7px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--text-3);cursor:pointer;transition:var(--T);flex-direction:column;gap:1px}
+.wd span{font-size:7px;color:var(--text-3)}
+.wd.done{background:var(--blue);color:white;box-shadow:0 0 10px rgba(0,71,255,.5)}.wd.done span{color:rgba(255,255,255,.7)}
+.wd:hover{transform:scale(1.15)}
+.heatmap-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px}
+.hm-cell{width:12px;height:12px;border-radius:3px;background:var(--border);transition:background .3s}
+.hm-cell.l1{background:rgba(0,71,255,.25)}.hm-cell.l2{background:rgba(0,71,255,.55)}.hm-cell.l3{background:var(--blue);box-shadow:0 0 4px rgba(0,71,255,.4)}
+.log-btn{width:100%;padding:10px;border-radius:var(--radius-m);font-family:var(--font-b);font-size:13px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:var(--T);border:1px solid rgba(0,224,122,.3);background:rgba(0,224,122,.08);color:var(--success);margin-top:10px}
+.log-btn:hover{background:rgba(0,224,122,.18);transform:translateY(-1px)}
+.log-btn.undo{background:rgba(255,45,85,.06);border-color:rgba(255,45,85,.25);color:var(--danger)}
+.log-btn.undo:hover{background:rgba(255,45,85,.14)}
+.emoji-picker{display:flex;gap:8px;flex-wrap:wrap}
+.emoji-opt{width:36px;height:36px;border-radius:var(--radius-s);background:var(--glass);border:1px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:var(--T)}
+.emoji-opt:hover,.emoji-opt.sel{background:var(--blue-dim);border-color:rgba(0,71,255,.4);transform:scale(1.1)}
+.freq-opt{padding:7px 14px;border-radius:var(--radius-p);background:var(--glass);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;transition:var(--T);color:var(--text-3)}
+.freq-opt.sel{background:var(--blue-dim);border-color:rgba(0,71,255,.4);color:var(--white)}
+
+/* SHOPPING */
+.shop-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-m);transition:var(--T);animation:fadeUp .4s var(--ease) both}
+.shop-item.bought{opacity:.5}.shop-item.bought .shop-name{text-decoration:line-through}
+.shop-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;transition:var(--T);display:flex;align-items:center;justify-content:center;font-size:10px}
+.shop-check.checked{background:var(--success);border-color:var(--success)}
+.shop-name{flex:1;font-weight:600;font-size:14px}
+.shop-qty{font-size:11px;color:var(--text-3)}
+.shop-price{font-family:var(--font-m);font-size:12px;color:var(--gold);font-weight:700}
+.cat-chip{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-p);background:var(--glass);border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;transition:var(--T);color:var(--text-3)}
+.cat-chip.active{background:var(--blue-dim);border-color:rgba(0,71,255,.4);color:var(--white)}
+.cat-chip:hover{background:var(--glass-hov);color:var(--text-1)}
+.priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.shop-section-hdr{font-family:var(--font-d);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3);padding:8px 0;border-bottom:1px solid var(--border);margin-bottom:10px;display:flex;justify-content:space-between}
+
+/* FINANCE */
+.salary-input-card{background:linear-gradient(135deg,rgba(0,71,255,.07),rgba(255,0,128,.05));border:1px solid rgba(0,71,255,.2);border-radius:var(--radius-xl);padding:28px;margin-bottom:24px;animation:fadeUp .6s var(--ease) both}
+.big-salary{font-family:var(--font-d);font-size:clamp(28px,5vw,48px);font-weight:900;color:var(--gold);line-height:1}
+.alloc-slider{width:100%;accent-color:var(--blue);height:4px}
+.alloc-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.alloc-label{flex:1;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+.alloc-pct-disp{font-family:var(--font-m);font-size:13px;color:var(--text-2);width:36px;text-align:right}
+.alloc-kes-disp{font-family:var(--font-m);font-size:12px;color:var(--gold);min-width:90px;text-align:right}
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut-legend{display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend-pct{font-family:var(--font-m);font-size:11px;color:var(--text-3);margin-left:auto}
+
+/* ANALYTICS */
+.analytics-hero{background:linear-gradient(135deg,rgba(0,71,255,.07),rgba(255,0,128,.05));border:1px solid rgba(0,71,255,.18);border-radius:var(--radius-xl);padding:28px;margin-bottom:28px;animation:fadeUp .6s var(--ease) both;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.rate-ring-wrap{position:relative;flex-shrink:0}
+.rate-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring{transform:rotate(-90deg)}.ring-track{fill:none;stroke:var(--border)}.ring-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset 1.5s var(--ease)}
+.pros-card{background:rgba(0,224,122,.04);border:1px solid rgba(0,224,122,.14);border-radius:var(--radius-l);padding:18px}
+.cons-card{background:rgba(255,45,85,.04);border:1px solid rgba(255,45,85,.14);border-radius:var(--radius-l);padding:18px}
+.pc-title{font-family:var(--font-d);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px}
+.pc-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--text-2);line-height:1.4}
+.pc-item:last-child{border:none}
+.achieve-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,224,122,.04);border:1px solid rgba(0,224,122,.14);border-radius:var(--radius-m);animation:fadeUp .5s var(--ease) both}
+.suggest-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:rgba(0,71,255,.04);border:1px solid rgba(0,71,255,.12);border-radius:var(--radius-m);animation:fadeUp .5s var(--ease) both}
+.suggest-icon{font-size:20px;flex-shrink:0}
+.suggest-text{font-size:13px;color:var(--text-2);line-height:1.5}
+.cb-row{display:flex;align-items:center;gap:10px}
+.cb-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.cb-bar{height:100%;border-radius:3px;transition:width 1s var(--ease)}
+.cb-pct{font-family:var(--font-m);font-size:11px;color:var(--text-3);width:32px;text-align:right}
+.cb-lbl{font-size:12px;width:110px;color:var(--text-2)}
+.chart-wrap{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:20px}
+.chart-title{font-family:var(--font-d);font-size:10px;letter-spacing:.2em;color:var(--text-3);text-transform:uppercase;margin-bottom:14px}
+
+/* DASHBOARD */
+.dash-hero{padding:28px 0 24px;animation:fadeUp .7s var(--ease) both}
+.hero-greeting{font-family:var(--font-d);font-size:clamp(18px,3vw,28px);font-weight:900;letter-spacing:.08em}
+.hero-greeting span{background:linear-gradient(135deg,var(--blue-mid),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:13px;color:var(--text-3);margin-top:6px;letter-spacing:.04em}
+.hero-date{font-family:var(--font-m);font-size:11px;color:var(--text-3);margin-top:4px}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.quick-btn{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:var(--T);color:var(--text-1);animation:fadeUp .5s var(--ease) both}
+.quick-btn:hover{border-color:rgba(0,71,255,.35);background:var(--glass-hov);transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.4)}
+.quick-btn span:first-child{font-size:26px}
+.quick-btn span:last-child{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase}
+.items-scroll{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.tl-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.tl-count{font-family:var(--font-m);font-size:10px;color:var(--text-3);margin-left:auto}
+
+/* PERIOD TABS */
+.period-tabs{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-m);padding:4px;width:fit-content;margin-bottom:20px}
+.period-btn{padding:7px 18px;border-radius:var(--radius-s);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--text-3);cursor:pointer;border:none;background:transparent;transition:var(--T);font-family:var(--font-b);text-transform:uppercase}
+.period-btn.active{background:var(--blue);color:white;box-shadow:0 0 14px rgba(0,71,255,.4)}
+
+/* STAGGER */
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.40s}.d6{animation-delay:.48s}
+
+/* KEYFRAMES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes particleRise{0%{transform:translateY(100vh) rotate(0deg);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translateY(-80px) rotate(720deg);opacity:0}}
+@keyframes bgPulse{0%{opacity:1}100%{opacity:.65}}
+@keyframes breathe{0%,100%{box-shadow:0 0 6px var(--success),0 0 12px var(--success)}50%{box-shadow:0 0 3px var(--success)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,20px) scale(1.12)}}
+@keyframes borderGlow{0%,100%{border-color:rgba(0,71,255,.3)}50%{border-color:rgba(255,0,128,.4)}}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){
+  .dynamic-island{min-width:unset;padding:7px 14px}.island-nav{display:none}.island-time{display:none}
+  .g4,.g3,.g2{grid-template-columns:1fr}.page-wrapper{padding:76px 14px 90px}
+  .fin-bar{gap:12px;padding:10px 16px;flex-wrap:wrap}.drawer{width:100vw}.form-row{grid-template-columns:1fr}
+  .login-card{padding:32px 24px}.analytics-hero{flex-direction:column}
+  .donut-wrap{justify-content:center}
+}
+@media(max-width:480px){.stat-val{font-size:24px}}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-bg">
+    <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  </div>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="brand-row">
+        <div class="brand-diamond"></div>
+        <div class="login-logo">NEXUS</div>
+        <div class="logo-dot"></div>
+      </div>
+      <div class="login-tagline">Your Life Command Center</div>
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="switchLoginTab('login')">Login</button>
+        <button class="login-tab" onclick="switchLoginTab('register')">Register</button>
+      </div>
+      <div id="loginError" class="login-error mb12"></div>
+
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <div class="flex-col gap14">
+          <div class="form-group"><label class="form-label">Username</label>
+            <input type="text" id="lUsername" class="form-control" placeholder="Enter your username" autocomplete="username"/></div>
+          <div class="form-group"><label class="form-label">Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="lPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password"/>
+              <button class="pw-toggle" onclick="togglePw('lPassword',this)">show</button>
+            </div></div>
+          <div class="flex-b" style="align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);cursor:pointer">
+              <input type="checkbox" id="rememberMe" style="accent-color:var(--blue)"/> Remember me
+            </label>
+            <span style="font-size:12px;color:var(--blue-light);cursor:pointer" onclick="showForgot()">Forgot password?</span>
+          </div>
+          <button class="submit-btn" id="loginBtn" onclick="doLogin()">— ENTER NEXUS</button>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerForm" class="hidden">
+        <div class="flex-col gap12">
+          <div class="form-group"><label class="form-label">Username</label>
+            <input type="text" id="rUsername" class="form-control" placeholder="Your unique name" autocomplete="username"/></div>
+          <div class="form-group"><label class="form-label">Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="rPassword" class="form-control" placeholder="Min. 6 characters" autocomplete="new-password" oninput="checkStrength()"/>
+              <button class="pw-toggle" onclick="togglePw('rPassword',this)">show</button>
+            </div>
+            <div class="strength-bar"><div class="sb-seg" id="s1"></div><div class="sb-seg" id="s2"></div><div class="sb-seg" id="s3"></div></div>
+            <span id="strengthLbl" style="font-size:10px;color:var(--text-3);margin-top:2px"></span>
+          </div>
+          <div class="form-group"><label class="form-label">Confirm Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="rConfirm" class="form-control" placeholder="Repeat password" autocomplete="new-password"/>
+              <button class="pw-toggle" onclick="togglePw('rConfirm',this)">show</button>
+            </div></div>
+          <div style="background:var(--blue-dim);border:1px solid rgba(0,71,255,.25);border-radius:var(--radius-m);padding:14px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-light);margin-bottom:4px">Your 5 Security Questions</div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Write your own questions — any 1 correct answer can reset your password.</div>
+            <div class="flex-col gap12" id="secQFields"></div>
+          </div>
+          <button class="submit-btn" id="registerBtn" onclick="doRegister()">◆ CREATE MY NEXUS</button>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD -->
+      <div id="forgotForm" class="hidden">
+        <div class="flex-col gap12">
+          <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Answer any one of your security questions to reset your password.</div>
+          <div class="form-group">
+            <label class="form-label">Choose a Security Question</label>
+            <select id="fqSelect" class="form-control" onchange="onForgotQChange()"></select>
+          </div>
+          <div class="form-group" id="fqAnswerWrap">
+            <label class="form-label">Your Answer</label>
+            <input type="text" id="fqAnswer" class="form-control" placeholder="Type your answer..."/>
+          </div>
+          <div class="form-group"><label class="form-label">New Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="fNewPw" class="form-control" placeholder="New password (min 6 chars)"/>
+              <button class="pw-toggle" onclick="togglePw('fNewPw',this)">show</button>
+            </div></div>
+          <button class="submit-btn" onclick="doResetPassword()">◆ RESET PASSWORD</button>
+          <button class="btn btn-ghost w-full" onclick="showLogin()" style="margin-top:-6px">Back to Login</button>
+        </div>
+      </div>
+      <div class="feature-pills">
+        <div class="f-pill">⊛ Encrypted Locally</div>
+        <div class="f-pill"> Works Offline</div>
+        <div class="f-pill"> KES Currency</div>
+      </div>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--text-3)">
+        Data stored on your device only. <span style="color:var(--blue-light);cursor:pointer" onclick="if(confirm('Delete ALL data?')){localStorage.clear();sessionStorage.clear();showToast('Cleared','info')}">Reset all data</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL (shown when logged in) -->
+<div id="appShell" class="hidden">
+  <!-- Dynamic Island — tap to open nav menu -->
+  <header class="dynamic-island" id="island" onclick="toggleIslandMenu()">
+    <span class="island-logo">NEXUS</span>
+    <div class="island-indicator" title="Active"></div>
+    <div class="island-center-hint" id="islandHint">tap to navigate</div>
+    <div class="island-right">
+      <span class="island-time fam-m text-xs" id="islandTime"></span>
+      <div class="island-avatar" id="islandAvatar">??</div>
+    </div>
+  </header>
+
+  <!-- Island Menu Overlay -->
+  <div class="island-menu-overlay" id="islandMenuOverlay" onclick="closeIslandMenu()"></div>
+  <div class="island-menu" id="islandMenu">
+    <div class="island-menu-top">
+      <div class="im-user">
+        <div class="im-avatar" id="imAvatar">??</div>
+        <div>
+          <div class="im-name" id="imName">Commander</div>
+          <div class="im-sub">NEXUS Account</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="margin-left:auto">Sign Out</button>
+      </div>
+    </div>
+    <div class="island-menu-nav">
+      <div class="im-nav-item" onclick="navFromMenu('dashboard')"><span class="im-icon">⊞</span><span>Dashboard</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('goals')"><span class="im-icon"></span><span>Goals</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('dreams')"><span class="im-icon"></span><span>Dreams</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('shopping')"><span class="im-icon"></span><span>Shopping List</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('finance')"><span class="im-icon"></span><span>Finance Planner</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('habits')"><span class="im-icon">⊙</span><span>Habits</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('analytics')"><span class="im-icon"></span><span>Analytics</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('images')"><span class="im-icon">◫</span><span>Vision Board</span><span class="im-arrow">›</span></div>
+      <div class="im-nav-item" onclick="navFromMenu('links')"><span class="im-icon">⊟</span><span>Saved Links</span><span class="im-arrow">›</span></div>
+    </div>
+    <div class="island-menu-fin">
+      <div class="im-fin-row"><span class="text-muted text-xs">Goals + Dreams</span><span class="fam-m text-xs text-gold" id="imFinGoals">KES 0</span></div>
+      <div class="im-fin-row"><span class="text-muted text-xs">Shopping</span><span class="fam-m text-xs text-gold" id="imFinShop">KES 0</span></div>
+      <div class="im-fin-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:8px"><span class="fw6 text-sm">Grand Total</span><span class="fam-m text-sm text-gold fw7" id="imFinTotal">KES 0</span></div>
+    </div>
+  </div>
+
+  <!-- Financial Bar -->
+  <div class="fin-bar">
+    <div class="fin-item"><label>Goals + Dreams</label><span id="finGoals">KES 0</span></div>
+    <div class="fin-divider"></div>
+    <div class="fin-item"><label>Shopping</label><span id="finShop">KES 0</span></div>
+    <div class="fin-divider"></div>
+    <div class="fin-item"><label>Grand Total</label><span id="finTotal">KES 0</span></div>
+    <div class="fin-spacer"></div>
+    <button class="btn btn-ghost btn-sm" onclick="nav('finance')">Finance</button>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-hdr">
+      <span class="drawer-title" id="drawerTitle">Add Item</span>
+      <button class="btn btn-ghost btn-icon" onclick="closeDrawer()"></button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+
+  <!--  DASHBOARD PAGE  -->
+  <div id="page-dashboard" class="page-wrapper page">
+    <div class="dash-hero">
+      <div class="hero-greeting">Good <span id="timeGreet">day</span>, <span id="heroName">Commander</span></div>
+      <div class="hero-sub" id="heroQuote">Your vision, planned and tracked.</div>
+      <div class="hero-date" id="heroDate"></div>
+    </div>
+    <div class="g4 mb24" id="dashStats"></div>
+    <div class="flex-b mb16"><div class="section-title">Quick Navigation</div></div>
+    <div class="quick-grid">
+      <div class="quick-btn d1" onclick="nav('goals')"><span style="font-size:20px;font-style:normal"></span><span>Goals</span></div>
+      <div class="quick-btn d2" onclick="nav('dreams')"><span style="font-size:20px"></span><span>Dreams</span></div>
+      <div class="quick-btn d3" onclick="nav('shopping')"><span style="font-size:20px"></span><span>Shopping</span></div>
+      <div class="quick-btn d4" onclick="nav('habits')"><span style="font-size:20px">⊙</span><span>Habits</span></div>
+      <div class="quick-btn d5" onclick="nav('finance')"><span style="font-size:20px"></span><span>Finance</span></div>
+      <div class="quick-btn d6" onclick="nav('analytics')"><span style="font-size:20px"></span><span>Analytics</span></div>
+    </div>
+    <div class="flex-b mb16" style="margin-top:8px"><div class="section-title">Timeline Overview</div><div class="text-muted text-xs" id="dashTotalItems"></div></div>
+    <div id="dashTimeline" class="mb24"></div>
+    <div class="flex-b mb12"><div class="section-title">Suggestions</div></div>
+    <div id="dashSuggestions" class="flex-col gap8 mb32"></div>
+  </div>
+
+  <!--  GOALS PAGE  -->
+  <div id="page-goals" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em"> Goals</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Define, plan, and conquer your targets</div></div>
+      <button class="btn btn-primary" onclick="openGoalDrawer()">+ New Goal</button>
+    </div>
+    <div class="flex-c gap12 mb20 flex-wrap">
+      <div class="tab-nav" id="goalFilterTabs">
+        <button class="tab-btn active" onclick="setGoalFilter('all',this)">All</button>
+        <button class="tab-btn" onclick="setGoalFilter('short',this)">Short-Term</button>
+        <button class="tab-btn" onclick="setGoalFilter('long',this)">Long-Term</button>
+        <button class="tab-btn" onclick="setGoalFilter('future',this)">Future</button>
+        <button class="tab-btn" onclick="setGoalFilter('achieved',this)">Achieved</button>
+        <button class="tab-btn" onclick="setGoalFilter('overdue',this)">Overdue</button>
+      </div>
+    </div>
+    <div id="goalsGrid" class="g3 mb32"></div>
+  </div>
+
+  <!--  DREAMS PAGE  -->
+  <div id="page-dreams" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em"> Dreams</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Cars, houses, travel, investments & everything you desire</div></div>
+      <button class="btn btn-pink" onclick="openDreamDrawer()">+ New Dream</button>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(0,71,255,.06),rgba(255,0,128,.06));border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;animation:fadeUp .6s var(--ease) both">
+      <div class="text-muted text-xs fw7" style="letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px">Total Dream Cost</div>
+      <div style="font-family:var(--font-d);font-size:clamp(26px,4vw,40px);font-weight:900"><span id="dreamTotalCost" style="background:linear-gradient(135deg,var(--blue-mid),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent">KES 0</span></div>
+      <div class="text-muted text-sm" style="margin-top:6px" id="dreamCountText">0 dreams tracked</div>
+    </div>
+    <div class="flex-c gap12 mb20 flex-wrap">
+      <div class="tab-nav" id="dreamFilterTabs">
+        <button class="tab-btn active" onclick="setDreamFilter('all',this)">All</button>
+        <button class="tab-btn" onclick="setDreamFilter('short',this)">Short-Term</button>
+        <button class="tab-btn" onclick="setDreamFilter('long',this)">Long-Term</button>
+        <button class="tab-btn" onclick="setDreamFilter('future',this)">Future</button>
+        <button class="tab-btn" onclick="setDreamFilter('achieved',this)">Achieved</button>
+      </div>
+    </div>
+    <div id="dreamsGrid" class="g3 mb32"></div>
+  </div>
+
+  <!--  SHOPPING PAGE  -->
+  <div id="page-shopping" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em"> Shopping List</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Essentials, household & everything you need</div></div>
+      <div class="flex-c gap8">
+        <button class="btn btn-ghost btn-sm" onclick="clearPurchased()">Clear Bought</button>
+        <button class="btn btn-primary" onclick="openShopDrawer()">+ Add Item</button>
+      </div>
+    </div>
+    <div class="g4 mb20" id="shopStats"></div>
+    <div class="flex-c gap8 mb20 flex-wrap" id="shopCats">
+      <div class="cat-chip active" onclick="setShopFilter('all',this)"> All</div>
+      <div class="cat-chip" onclick="setShopFilter('food',this)"> Food</div>
+      <div class="cat-chip" onclick="setShopFilter('household',this)"> Household</div>
+      <div class="cat-chip" onclick="setShopFilter('care',this)"> Care</div>
+      <div class="cat-chip" onclick="setShopFilter('clothing',this)"> Clothing</div>
+      <div class="cat-chip" onclick="setShopFilter('tech',this)"> Tech</div>
+      <div class="cat-chip" onclick="setShopFilter('other',this)"> Other</div>
+      <div class="cat-chip" onclick="setShopFilter('bought',this)"> Bought</div>
+    </div>
+    <div id="shopList" class="mb32"></div>
+  </div>
+
+  <!--  FINANCE PAGE  -->
+  <div id="page-finance" class="page-wrapper page">
+    <div class="flex-b mb24">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em"> Finance Planner</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Salary allocation, goal timelines & financial clarity</div></div>
+      <button class="btn btn-primary" onclick="saveSalary()">Save Changes</button>
+    </div>
+    <div class="salary-input-card">
+      <div class="text-muted text-xs fw7" style="letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px">Monthly Net Salary</div>
+      <div class="flex-c gap16 mb16 flex-wrap">
+        <div class="big-salary" id="bigSalary">KES 0</div>
+        <div style="flex:1;min-width:200px">
+          <div class="form-group"><label class="form-label">Salary Amount (KES)</label>
+            <div class="flex-c gap8 mb8">
+              <div class="freq-opt sel" id="salTypeMonthly" onclick="setSalType('monthly',this)">Monthly</div>
+              <div class="freq-opt" id="salTypeWeekly" onclick="setSalType('weekly',this)">Weekly</div>
+            </div>
+            <input type="number" id="salaryInput" class="form-control" placeholder="e.g. 85000" oninput="onSalaryChange()"/></div>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="stat-card"><div class="stat-label">Daily</div><div class="stat-val blue" id="dailyBudget">—</div></div><div class="stat-card"><div class="stat-label">Monthly</div><div class="stat-val pink" id="weeklyBudget">—</div></div><div class="stat-card"><div class="stat-label">Annual</div><div class="stat-val gold" id="annualSalary">—</div></div>
+      </div>
+    </div>
+    <div class="card mb16">
+      <div style="font-family:var(--font-d);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px">Budget Allocation</div>
+      <div id="allocRows"></div>
+      <div id="allocWarn" class="text-sm" style="margin-top:12px;color:var(--danger);display:none"> Total exceeds 100%</div>
+      <div id="allocOk" class="text-sm text-green" style="margin-top:12px;display:none"> Total: <span id="allocTotal">0</span>%</div>
+    </div>
+    <div class="card mb16">
+      <div style="font-family:var(--font-d);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px">Allocation Breakdown</div>
+      <div class="donut-wrap">
+        <canvas id="donutCanvas" width="160" height="160"></canvas>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+    <div class="card mb32">
+      <div style="font-family:var(--font-d);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px">Goal Savings Timeline</div>
+      <div id="goalTimeline"></div>
+    </div>
+  </div>
+
+  <!--  HABITS PAGE  -->
+  <div id="page-habits" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em">⊙ Habits</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Build discipline one day at a time</div></div>
+      <button class="btn btn-primary" onclick="openHabitDrawer()">+ New Habit</button>
+    </div>
+    <div class="g4 mb24" id="habitStats"></div>
+    <div class="flex-b mb16"><div class="section-title">Today — <span id="todayDateLbl" class="text-blue"></span></div><div class="text-muted text-xs" id="todayPct"></div></div>
+    <div id="habitGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" class="mb28"></div>
+    <div class="flex-b mb12" style="margin-top:24px"><div class="section-title">90-Day Heatmap</div></div>
+    <div class="card mb32" id="heatmapCard"><div class="text-muted text-sm">Add habits to see your heatmap.</div></div>
+  </div>
+
+  <!--  ANALYTICS PAGE  -->
+  <div id="page-analytics" class="page-wrapper page">
+    <div class="flex-b mb24">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em"> Analytics</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Your progress, patterns & path forward</div></div>
+      <div class="period-tabs">
+        <button class="period-btn active" onclick="setAnalyticsPeriod('week',this)">Week</button>
+        <button class="period-btn" onclick="setAnalyticsPeriod('month',this)">Month</button>
+        <button class="period-btn" onclick="setAnalyticsPeriod('year',this)">Year</button>
+        <button class="period-btn" onclick="setAnalyticsPeriod('all',this)">All Time</button>
+      </div>
+    </div>
+    <div class="analytics-hero">
+      <div class="rate-ring-wrap">
+        <svg width="120" height="120" class="ring" viewBox="0 0 120 120">
+          <circle class="ring-track" cx="60" cy="60" r="48" stroke-width="8"/>
+          <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="48" stroke-width="8" stroke="url(#ringGrad)" stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+          <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0047FF"/><stop offset="100%" stop-color="#FF0080"/></linearGradient></defs>
+        </svg>
+        <div class="rate-ring-center">
+          <div style="font-family:var(--font-d);font-size:22px;font-weight:900" id="heroRate">0%</div>
+          <div class="text-muted" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Done</div>
+        </div>
+      </div>
+      <div style="flex:1"><div class="g2" id="heroStats" style="gap:12px"></div></div>
+    </div>
+    <div class="g4 mb20" id="analyticsStats"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px" id="chartsRow">
+      <div class="chart-wrap"><div class="chart-title">Goals by Category</div><div id="catBreakdown" class="flex-col gap8"></div></div>
+      <div class="chart-wrap"><div class="chart-title">Cost by Timeline (KES thousands)</div><canvas id="costCanvas" width="300" height="180"></canvas></div>
+      <div class="chart-wrap"><div class="chart-title">Activity — Last 8 Weeks</div><canvas id="activityCanvas" width="300" height="180"></canvas></div>
+      <div class="chart-wrap"><div class="chart-title">Goal Distribution</div><div class="donut-wrap" style="justify-content:center"><canvas id="distCanvas" width="140" height="140"></canvas></div></div>
+    </div>
+    <div class="flex-b mb12"><div class="section-title">Recent Achievements</div></div>
+    <div id="achieveList" class="flex-col gap8 mb20"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px" id="prosConsGrid">
+      <div class="pros-card"><div class="pc-title" style="color:var(--success)"> What's Working</div><div id="prosList"></div></div>
+      <div class="cons-card"><div class="pc-title" style="color:var(--danger)"> Areas to Improve</div><div id="consList"></div></div>
+    </div>
+    <div class="flex-b mb12"><div class="section-title">Recommendations</div></div>
+    <div id="analyticssuggestions" class="flex-col gap8 mb32"></div>
+  </div>
+
+  <!-- ═══════════ IMAGES PAGE ═══════════ -->
+  <div id="page-images" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em">◫ My Vision Board</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Attach photos to goals, dreams, receipts & products</div></div>
+      <button class="btn btn-primary" onclick="openImageDrawer()">+ Add Image</button>
+    </div>
+    <div class="flex-c gap8 mb20 flex-wrap" id="imgCatFilter">
+      <div class="cat-chip active" onclick="setImgFilter('all',this)">All</div>
+      <div class="cat-chip" onclick="setImgFilter('dream',this)">Dreams</div>
+      <div class="cat-chip" onclick="setImgFilter('goal',this)">Goals</div>
+      <div class="cat-chip" onclick="setImgFilter('product',this)">Products</div>
+      <div class="cat-chip" onclick="setImgFilter('receipt',this)">Receipts</div>
+      <div class="cat-chip" onclick="setImgFilter('inspiration',this)">Inspiration</div>
+    </div>
+    <div id="imagesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px" class="mb32"></div>
+  </div>
+
+  <!-- ═══════════ SAVED LINKS PAGE ═══════════ -->
+  <div id="page-links" class="page-wrapper page">
+    <div class="flex-b mb20">
+      <div><div style="font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em">⊟ Saved Links</div>
+      <div class="text-muted text-sm" style="margin-top:4px">Websites, content & anything you want to revisit</div></div>
+      <button class="btn btn-primary" onclick="openLinkDrawer()">+ Save Link</button>
+    </div>
+    <div class="flex-c gap8 mb20 flex-wrap" id="linkCatFilter">
+      <div class="cat-chip active" onclick="setLinkFilter('all',this)">All</div>
+      <div class="cat-chip" onclick="setLinkFilter('website',this)">Websites</div>
+      <div class="cat-chip" onclick="setLinkFilter('shopping',this)">Shopping</div>
+      <div class="cat-chip" onclick="setLinkFilter('article',this)">Articles</div>
+      <div class="cat-chip" onclick="setLinkFilter('video',this)">Videos</div>
+      <div class="cat-chip" onclick="setLinkFilter('other',this)">Other</div>
+      <div class="cat-chip" onclick="setLinkFilter('unread',this)">Unread</div>
+    </div>
+    <div id="linksGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px" class="mb32"></div>
+  </div>
+
+</div><!-- end appShell -->
+
+<style>
+/* IMAGE CARDS */
+.img-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);overflow:hidden;transition:var(--T);animation:fadeUp .5s var(--ease) both}
+.img-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.5);border-color:rgba(0,71,255,.3)}
+.img-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--bg-3)}
+.img-thumb-placeholder{width:100%;aspect-ratio:4/3;background:var(--bg-3);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--text-3)}
+.img-info{padding:12px 14px}
+.img-title{font-weight:700;font-size:14px;margin-bottom:4px}
+.img-meta{font-size:11px;color:var(--text-3);display:flex;align-items:center;justify-content:space-between}
+.img-tag{padding:3px 8px;border-radius:var(--radius-p);font-size:10px;font-weight:700;background:var(--blue-dim);color:var(--blue-light);border:1px solid rgba(0,71,255,.25)}
+/* LINK CARDS */
+.link-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-l);padding:16px 18px;transition:var(--T);animation:fadeUp .5s var(--ease) both;position:relative}
+.link-card:hover{transform:translateY(-3px);border-color:rgba(0,71,255,.3);box-shadow:0 12px 36px rgba(0,0,0,.4)}
+.link-card.read{opacity:.55}
+.link-url{font-family:var(--font-m);font-size:10px;color:var(--blue-light);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.link-url:hover{text-decoration:underline}
+.link-title{font-weight:700;font-size:14px;margin-bottom:4px;line-height:1.3}
+.link-note{font-size:12px;color:var(--text-2);margin-bottom:10px;line-height:1.4}
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue-glow);flex-shrink:0}
+/* Image upload input */
+.img-upload-area{border:2px dashed var(--border);border-radius:var(--radius-l);padding:24px;text-align:center;cursor:pointer;transition:var(--T);position:relative;overflow:hidden}
+.img-upload-area:hover{border-color:var(--blue);background:var(--blue-dim)}
+.img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-preview{width:100%;border-radius:var(--radius-m);margin-top:10px;max-height:180px;object-fit:cover;display:none}
+</style>
+
+<script>
+'use strict';
+/* 
+   DATA LAYER
+ */
+const DATA_KEY='nexus_v2_data', USER_KEY='nexus_v2_user';
+const DB={
+  _blank(){return{goals:[],dreams:[],shopping:[],salary:{monthly:0,alloc:{savings:20,rent:25,food:15,transport:10,entertainment:10,invest:10,other:10}},habits:[],images:[],links:[],meta:{createdAt:new Date().toISOString()}}},
+  get(){try{const r=localStorage.getItem(DATA_KEY);return r?JSON.parse(r):this._blank()}catch{return this._blank()}},
+  save(d){localStorage.setItem(DATA_KEY,JSON.stringify(d));return d},
+  getUser(){try{const r=localStorage.getItem(USER_KEY);return r?JSON.parse(r):null}catch{return null}},
+  saveUser(u){localStorage.setItem(USER_KEY,JSON.stringify(u))},
+  addGoal(g){const d=this.get();const item={id:`g_${Date.now()}`,...g,createdAt:new Date().toISOString(),achieved:false,achievedAt:null};d.goals.push(item);this.save(d);return item},
+  updateGoal(id,upd){const d=this.get();const i=d.goals.findIndex(x=>x.id===id);if(i>-1){d.goals[i]={...d.goals[i],...upd};this.save(d);return d.goals[i]}},
+  deleteGoal(id){const d=this.get();d.goals=d.goals.filter(x=>x.id!==id);this.save(d)},
+  achieveGoal(id){return this.updateGoal(id,{achieved:true,achievedAt:new Date().toISOString()})},
+  addDream(g){const d=this.get();const item={id:`dr_${Date.now()}`,...g,createdAt:new Date().toISOString(),achieved:false,achievedAt:null};d.dreams.push(item);this.save(d);return item},
+  updateDream(id,upd){const d=this.get();const i=d.dreams.findIndex(x=>x.id===id);if(i>-1){d.dreams[i]={...d.dreams[i],...upd};this.save(d);return d.dreams[i]}},
+  deleteDream(id){const d=this.get();d.dreams=d.dreams.filter(x=>x.id!==id);this.save(d)},
+  achieveDream(id){return this.updateDream(id,{achieved:true,achievedAt:new Date().toISOString()})},
+  addShop(s){const d=this.get();const item={id:`sh_${Date.now()}`,...s,purchased:false,createdAt:new Date().toISOString()};d.shopping.push(item);this.save(d);return item},
+  toggleShop(id){const d=this.get();const i=d.shopping.findIndex(x=>x.id===id);if(i>-1){d.shopping[i].purchased=!d.shopping[i].purchased;this.save(d);return d.shopping[i]}},
+  deleteShop(id){const d=this.get();d.shopping=d.shopping.filter(x=>x.id!==id);this.save(d)},
+  updateSalary(s){const d=this.get();d.salary={...d.salary,...s};this.save(d);return d.salary},
+  addHabit(h){const d=this.get();const item={id:`hb_${Date.now()}`,...h,streak:0,logs:[],createdAt:new Date().toISOString()};d.habits.push(item);this.save(d);return item},
+  logHabit(id){const d=this.get();const i=d.habits.findIndex(x=>x.id===id);if(i<0)return null;const today=new Date().toDateString();if(!d.habits[i].logs.includes(today)){d.habits[i].logs.push(today);d.habits[i].streak=this._streak(d.habits[i].logs)}this.save(d);return d.habits[i]},
+  unlogHabit(id){const d=this.get();const i=d.habits.findIndex(x=>x.id===id);if(i<0)return null;const today=new Date().toDateString();d.habits[i].logs=d.habits[i].logs.filter(l=>l!==today);d.habits[i].streak=this._streak(d.habits[i].logs);this.save(d);return d.habits[i]},
+  _streak(logs){if(!logs.length)return 0;const dates=[...new Set(logs)].map(l=>new Date(l)).sort((a,b)=>b-a);let s=0,ref=new Date();ref.setHours(0,0,0,0);for(const d of dates){const dc=new Date(d);dc.setHours(0,0,0,0);if(Math.round((ref-dc)/864e5)<=1){s++;ref=dc}else break}return s},
+  deleteHabit(id){const d=this.get();d.habits=d.habits.filter(x=>x.id!==id);this.save(d)},
+  addImage(img){const d=this.get();if(!d.images)d.images=[];const item={id:`img_${Date.now()}`,...img,createdAt:new Date().toISOString()};d.images.push(item);this.save(d);return item},
+  deleteImage(id){const d=this.get();d.images=(d.images||[]).filter(x=>x.id!==id);this.save(d)},
+  addLink(lnk){const d=this.get();if(!d.links)d.links=[];const item={id:`lnk_${Date.now()}`,...lnk,read:false,createdAt:new Date().toISOString()};d.links.push(item);this.save(d);return item},
+  toggleLinkRead(id){const d=this.get();const i=(d.links||[]).findIndex(x=>x.id===id);if(i>-1){d.links[i].read=!d.links[i].read;this.save(d)}},
+  deleteLink(id){const d=this.get();d.links=(d.links||[]).filter(x=>x.id!==id);this.save(d)},
+  classify(t){if(!t)return'unset';const m=(new Date(t)-new Date())/2628e6;if(m<0)return'overdue';if(m<=6)return'short';if(m<=36)return'long';return'future'},
+  totalCost(){const d=this.get();const g=d.goals.filter(x=>!x.achieved).reduce((s,x)=>s+(parseFloat(x.price)||0),0);const dr=d.dreams.filter(x=>!x.achieved).reduce((s,x)=>s+(parseFloat(x.price)||0),0);const sh=d.shopping.filter(x=>!x.purchased).reduce((s,x)=>s+(parseFloat(x.price)||0)*(parseInt(x.qty)||1),0);return{goals:g,dreams:dr,shopping:sh,total:g+dr+sh}},
+  analytics(){const d=this.get();const all=[...d.goals,...d.dreams];const total=all.length,achieved=all.filter(x=>x.achieved).length;const rate=total?Math.round(achieved/total*100):0;const topStreak=d.habits.reduce((m,h)=>Math.max(m,h.streak||0),0);const c=this.totalCost();const mNeeded=d.salary.monthly>0?Math.ceil(c.total/d.salary.monthly):null;return{total,achieved,pending:total-achieved,rate,topStreak,monthlyCost:c,monthsNeeded:mNeeded}}
+};
+
+/* 
+   AUTH
+ */
+const SALT='nexus_ksh_v2_salt';
+const SESSION_KEY='nexus_session';
+const REMEMBER_KEY='nexus_remember';
+
+// No fixed questions — user defines their own during registration
+async function hashPw(pw){const enc=new TextEncoder();const buf=await crypto.subtle.digest('SHA-256',enc.encode(pw+SALT));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+
+async function authRegister(u,p,questions,answers){
+  if(!u||u.length<3)throw new Error('Username must be at least 3 characters.');
+  if(!p||p.length<6)throw new Error('Password must be at least 6 characters.');
+  if(DB.getUser())throw new Error('Account already exists. Please login.');
+  if(!questions||questions.some(q=>!q||q.trim().length<4))throw new Error('Please write all 5 security questions.');
+  if(!answers||answers.some(a=>!a||a.trim().length<2))throw new Error('Please answer all 5 security questions.');
+  const h=await hashPw(p);
+  const hashedAnswers=await Promise.all(answers.map(a=>hashPw(a.trim().toLowerCase())));
+  const user={username:u.trim(),passwordHash:h,initials:u.trim().slice(0,2).toUpperCase(),
+    secQuestions:questions.map(q=>q.trim()),
+    secAnswers:hashedAnswers,createdAt:new Date().toISOString()};
+  DB.saveUser(user);setSession(user);return user;
+}
+
+async function authLogin(u,p){
+  const user=DB.getUser();
+  if(!user)throw new Error('No account found. Please register first.');
+  if(user.username.toLowerCase()!==u.trim().toLowerCase())throw new Error('Incorrect username or password.');
+  const h=await hashPw(p);
+  if(h!==user.passwordHash)throw new Error('Incorrect username or password.');
+  setSession(user);return user;
+}
+
+// Only ONE correct answer needed to reset
+async function authResetPassword(answerIdx,answerVal,newPw){
+  const user=DB.getUser();
+  if(!user)throw new Error('No account found.');
+  if(!user.secAnswers||!user.secQuestions)throw new Error('No security questions on file.');
+  if(!newPw||newPw.length<6)throw new Error('New password must be at least 6 characters.');
+  const hashed=await hashPw((answerVal||'').trim().toLowerCase());
+  if(hashed!==user.secAnswers[answerIdx])throw new Error('That answer is incorrect. Try a different question.');
+  user.passwordHash=await hashPw(newPw);
+  DB.saveUser(user);return true;
+}
+
+function setSession(user){localStorage.setItem(SESSION_KEY,JSON.stringify({username:user.username,initials:user.initials,loginAt:Date.now()}))}
+function getSession(){try{const r=localStorage.getItem(SESSION_KEY);return r?JSON.parse(r):null}catch{return null}}
+function doLogout(){localStorage.removeItem(SESSION_KEY);document.getElementById('appShell').classList.add('hidden');document.getElementById('loginPage').style.display='block';showLogin()}
+
+/* 
+   UTILITIES
+ */
+function kes(n){return'KES '+(parseFloat(n)||0).toLocaleString('en-KE',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function kesShort(n){n=parseFloat(n)||0;if(n>=1e6)return'KES '+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'KES '+(n/1e3).toFixed(0)+'K';return'KES '+n.toLocaleString()}
+function fmtDate(s){if(!s)return'—';return new Date(s).toLocaleDateString('en-KE',{year:'numeric',month:'short',day:'numeric'})}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function cdHTML(t){if(!t)return'<span class="text-muted text-xs">No date set</span>';const now=new Date(),dt=new Date(t),diff=dt-now;if(diff<0)return'<span class="overdue-badge">OVERDUE</span>';const days=Math.floor(diff/864e5),hrs=Math.floor((diff%864e5)/3.6e6),mins=Math.floor((diff%3.6e6)/6e4),months=Math.floor(days/30.44);if(days>730)return`<span class="text-blue text-xs fam-m">${Math.floor(days/365)}y ${months%12}m left</span>`;if(days>60)return`<div class="countdown"><div class="cd-block"><span class="cd-val">${months}</span><span class="cd-lbl">mo</span></div><span class="cd-sep">:</span><div class="cd-block"><span class="cd-val">${days%30}</span><span class="cd-lbl">day</span></div></div>`;return`<div class="countdown"><div class="cd-block"><span class="cd-val">${days}</span><span class="cd-lbl">days</span></div><span class="cd-sep">:</span><div class="cd-block"><span class="cd-val">${hrs}</span><span class="cd-lbl">hrs</span></div><span class="cd-sep">:</span><div class="cd-block"><span class="cd-val">${mins}</span><span class="cd-lbl">min</span></div></div>`}
+function showToast(msg,type='info'){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className=`toast ${type}`;const icons={success:'',error:'',info:'',warning:''};t.innerHTML=`<span style="font-size:16px">${icons[type]||''}</span><span>${msg}</span>`;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3200)}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerOverlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerOverlay').classList.remove('open');document.body.style.overflow=''}
+function updateFinBar(){const c=DB.totalCost();const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=kesShort(v)};s('finTotal',c.total);s('finGoals',c.goals+c.dreams);s('finShop',c.shopping)}
+function updateClock(){const el=document.getElementById('islandTime');if(el)el.textContent=new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit',hour12:true})}
+
+const CATS={
+  personal:{icon:'',label:'Personal',bg:'rgba(0,71,255,.18)'},
+  business:{icon:'',label:'Business',bg:'rgba(255,0,128,.18)'},
+  education:{icon:'',label:'Education',bg:'rgba(255,170,0,.18)'},
+  health:{icon:'',label:'Health',bg:'rgba(0,224,122,.18)'},
+  travel:{icon:'',label:'Travel',bg:'rgba(0,120,255,.18)'},
+  finance:{icon:'',label:'Finance',bg:'rgba(255,215,0,.18)'},
+  other:{icon:'',label:'Other',bg:'rgba(255,255,255,.1)'},
+  car:{icon:'',label:'Dream Car',bg:'rgba(0,71,255,.18)'},
+  house:{icon:'',label:'Dream House',bg:'rgba(255,0,128,.18)'},
+  land:{icon:'',label:'Land/Plot',bg:'rgba(0,200,80,.18)'},
+  furniture:{icon:'',label:'Furniture',bg:'rgba(255,140,0,.18)'},
+  electronics:{icon:'',label:'Electronics',bg:'rgba(0,200,255,.18)'},
+  fashion:{icon:'',label:'Fashion',bg:'rgba(255,0,128,.18)'},
+  investment:{icon:'',label:'Investment',bg:'rgba(255,215,0,.18)'},
+  holiday:{icon:'',label:'Holiday',bg:'rgba(0,180,255,.18)'},
+  food:{icon:'',label:'Food',bg:'rgba(0,200,80,.18)'},
+  household:{icon:'',label:'Household',bg:'rgba(255,140,0,.18)'},
+  care:{icon:'',label:'Personal Care',bg:'rgba(255,0,128,.18)'},
+  clothing:{icon:'',label:'Clothing',bg:'rgba(0,71,255,.18)'},
+  tech:{icon:'',label:'Tech',bg:'rgba(0,200,255,.18)'}
+};
+function cat(k){return CATS[k]||{icon:'',label:k||'Item',bg:'rgba(255,255,255,.1)'}}
+
+function drawBar(canvas,labels,values,color='rgba(0,71,255,.85)'){if(!canvas)return;const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);const max=Math.max(...values,1);const pX=32,pY=16,cW=W-pX*2,cH=H-pY*2-18;const bW=Math.min(Math.floor(cW/labels.length*.55),28);const gap=cW/labels.length;ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;for(let i=0;i<=4;i++){const y=pY+cH*(1-i/4);ctx.beginPath();ctx.moveTo(pX,y);ctx.lineTo(W-pX,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='8px monospace';ctx.textAlign='right';ctx.fillText(Math.round(max*i/4),pX-4,y+3)}labels.forEach((lbl,i)=>{const v=values[i]||0;const bH=Math.max((v/max)*cH,v>0?2:0);const x=pX+gap*i+gap/2-bW/2;const y=pY+cH-bH;const grad=ctx.createLinearGradient(0,y,0,y+bH);grad.addColorStop(0,color);grad.addColorStop(1,'rgba(0,71,255,.1)');ctx.fillStyle=grad;ctx.beginPath();ctx.rect(x,y,bW,bH);ctx.fill();ctx.fillStyle='rgba(255,255,255,.35)';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,x+bW/2,H-4);if(v>0){ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='bold 9px sans-serif';ctx.fillText(v,x+bW/2,y-4)}})}
+function drawDonut(canvas,labels,values,colors){if(!canvas)return;const ctx=canvas.getContext('2d');const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);const total=values.reduce((s,v)=>s+v,0);if(!total)return;const cx=W/2,cy=H/2,r=Math.min(cx,cy)-12;let ang=-Math.PI/2;values.forEach((v,i)=>{const sl=(v/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ang+=sl});ctx.beginPath();ctx.arc(cx,cy,r*.58,0,Math.PI*2);ctx.fillStyle='#09090f';ctx.fill()}
+
+function suggestions(){
+  const d=DB.get(),a=DB.analytics(),c=DB.totalCost();const tips=[];
+  if(!d.goals.length&&!d.dreams.length)tips.push({icon:'',txt:'Start by adding your first goal or dream!'});
+  if(a.rate<20&&a.total>2)tips.push({icon:'',txt:'Your completion rate is low. Focus on short-term goals to build momentum.'});
+  if([...d.goals,...d.dreams].filter(g=>!g.targetDate).length>0)tips.push({icon:'',txt:'Some goals have no target date. A goal without a deadline is just a wish!'});
+  if(a.topStreak<7&&d.habits.length>0)tips.push({icon:'',txt:'Try maintaining a 7-day streak. Small wins compound.'});
+  if(d.salary.monthly===0)tips.push({icon:'',txt:'Set up your salary to see how long each goal will take to reach.'});
+  if(d.habits.length===0)tips.push({icon:'',txt:'Start tracking a daily habit — even 1 habit adds structure to your life.'});
+  if(a.achieved===0&&a.total>2)tips.push({icon:'',txt:'Pick your easiest goal and complete it this week!'});
+  return tips.slice(0,5)
+}
+
+/* 
+   ROUTER
+ */
+let currentPage='dashboard';
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+page);if(el)el.classList.add('active');
+  currentPage=page;
+  // update island hint text
+  const labels={dashboard:'Dashboard',goals:'Goals',dreams:'Dreams',shopping:'Shopping',finance:'Finance',habits:'Habits',analytics:'Analytics'};
+  const hint=document.getElementById('islandHint');if(hint)hint.textContent=labels[page]||'NEXUS';
+  if(page==='dashboard')renderDashboard();
+  else if(page==='goals')renderGoals();
+  else if(page==='dreams')renderDreams();
+  else if(page==='shopping')renderShopping();
+  else if(page==='finance')renderFinance();
+  else if(page==='habits')renderHabits();
+  else if(page==='analytics')renderAnalytics();
+  else if(page==='images')renderImages();
+  else if(page==='links')renderLinks();
+  window.scrollTo(0,0);
+}
+function toggleIslandMenu(){
+  const menu=document.getElementById('islandMenu');
+  const overlay=document.getElementById('islandMenuOverlay');
+  const island=document.getElementById('island');
+  if(!menu)return;
+  const isOpen=menu.classList.contains('open');
+  if(isOpen){closeIslandMenu()}
+  else{
+    menu.classList.add('open');overlay.classList.add('open');island.classList.add('menu-open');
+    const c=DB.totalCost();
+    const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=kesShort(v)};
+    s('imFinGoals',c.goals+c.dreams);s('imFinShop',c.shopping);s('imFinTotal',c.total);
+    document.querySelectorAll('.im-nav-item').forEach(el=>{
+      const txt=el.getAttribute('onclick')||'';
+      el.classList.toggle('active',txt.includes(`'${currentPage}'`));
+    });
+  }
+}
+function closeIslandMenu(){
+  document.getElementById('islandMenu')?.classList.remove('open');
+  document.getElementById('islandMenuOverlay')?.classList.remove('open');
+  document.getElementById('island')?.classList.remove('menu-open');
+}
+function navFromMenu(page){closeIslandMenu();nav(page)}
+
+/* 
+   PARTICLES
+ */
+function spawnParticles(){
+  const el=document.getElementById('particles');if(!el)return;
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div');p.className='particle';const sz=Math.random()*3+1;const b=Math.random()>.45;
+    Object.assign(p.style,{width:`${sz}px`,height:`${sz}px`,left:`${Math.random()*100}%`,background:b?`rgba(0,71,255,${Math.random()*.5+.3})`:`rgba(255,0,128,${Math.random()*.5+.2})`,animationDuration:`${Math.random()*14+8}s`,animationDelay:`${Math.random()*8}s`});
+    el.appendChild(p)
+  }
+}
+
+/* 
+   LOGIN LOGIC
+ */
+function switchLoginTab(t){
+  document.querySelectorAll('.login-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.login-tab').forEach(b=>{if(b.textContent.toLowerCase()===t)b.classList.add('active')});
+  showLogin(t);
+}
+function showLogin(tab='login'){
+  document.getElementById('loginForm').classList.toggle('hidden',tab!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden',tab!=='register');
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.querySelector('.login-tabs').style.display='flex';
+  document.getElementById('loginError').classList.remove('show');
+  if(tab==='register') buildSecQFields();
+}
+function showForgot(){
+  ['loginForm','registerForm'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('forgotForm').classList.remove('hidden');
+  document.querySelector('.login-tabs').style.display='none';
+  document.getElementById('loginError').classList.remove('show');
+  buildForgotFields();
+}
+function buildSecQFields(){
+  document.getElementById('secQFields').innerHTML=[1,2,3,4,5].map(i=>`
+    <div style="border:1px solid var(--border);border-radius:var(--radius-m);padding:10px;background:rgba(0,0,0,.2)">
+      <div style="font-size:10px;color:var(--blue-light);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Question ${i}</div>
+      <input type="text" id="sq_q${i}" class="form-control mb8" placeholder="Write your own question e.g. My dog's name?" style="margin-bottom:6px"/>
+      <input type="text" id="sq_a${i}" class="form-control" placeholder="Your answer"/>
+    </div>`).join('');
+}
+function buildForgotFields(){
+  const user=DB.getUser();
+  const sel=document.getElementById('fqSelect');
+  if(!sel)return;
+  if(!user?.secQuestions||!user.secAnswers){sel.innerHTML='<option>No security questions on file</option>';return}
+  sel.innerHTML=user.secQuestions.map((q,i)=>`<option value="${i}">${q}</option>`).join('');
+}
+function onForgotQChange(){}
+function showLoginErr(msg){const e=document.getElementById('loginError');e.textContent=msg;e.classList.toggle('show',!!msg)}
+function togglePw(id,btn){const el=document.getElementById(id);const hidden=el.type==='password';el.type=hidden?'text':'password';btn.textContent=hidden?'hide':'show'}
+function checkStrength(){const pw=document.getElementById('rPassword').value;const segs=[document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3')];const lbl=document.getElementById('strengthLbl');segs.forEach(s=>{s.style.background='var(--border)'});if(!pw){lbl.textContent='';return}let sc=0;if(pw.length>=6)sc++;if(pw.length>=10)sc++;if(/[A-Z]/.test(pw)&&/[0-9!@#$%]/.test(pw))sc++;const cols=['var(--danger)','var(--warning)','var(--success)'];const lbls=['Weak','Moderate','Strong'];for(let i=0;i<sc;i++)segs[i].style.background=cols[sc-1];lbl.textContent=lbls[sc-1]||'';lbl.style.color=cols[sc-1]}
+async function doLogin(){
+  showLoginErr('');
+  const u=document.getElementById('lUsername').value.trim(),p=document.getElementById('lPassword').value;
+  if(!u||!p){showLoginErr('Please fill in all fields.');return}
+  const btn=document.getElementById('loginBtn');btn.textContent='Authenticating...';btn.classList.add('loading');
+  try{await authLogin(u,p);btn.textContent='Welcome back!';setTimeout(()=>bootApp(),500)}
+  catch(e){showLoginErr(e.message);btn.textContent='— ENTER NEXUS';btn.classList.remove('loading')}
+}
+async function doRegister(){
+  showLoginErr('');
+  const u=document.getElementById('rUsername').value.trim(),p=document.getElementById('rPassword').value,c=document.getElementById('rConfirm').value;
+  if(!u||!p||!c){showLoginErr('Please fill in all fields.');return}
+  if(p!==c){showLoginErr('Passwords do not match.');return}
+  const questions=[1,2,3,4,5].map(i=>(document.getElementById(`sq_q${i}`)?.value||'').trim());
+  const answers=[1,2,3,4,5].map(i=>(document.getElementById(`sq_a${i}`)?.value||'').trim());
+  if(questions.some(q=>q.length<4)){showLoginErr('Each question must be at least 4 characters.');return}
+  if(answers.some(a=>a.length<2)){showLoginErr('Each answer must be at least 2 characters.');return}
+  const btn=document.getElementById('registerBtn');btn.textContent='Creating...';btn.classList.add('loading');
+  try{await authRegister(u,p,questions,answers);btn.textContent='Account created!';setTimeout(()=>bootApp(),500)}
+  catch(e){showLoginErr(e.message);btn.textContent='◆ CREATE MY NEXUS';btn.classList.remove('loading')}
+}
+async function doResetPassword(){
+  showLoginErr('');
+  const sel=document.getElementById('fqSelect');
+  const idx=parseInt(sel?.value||'0');
+  const answerVal=(document.getElementById('fqAnswer')?.value||'').trim();
+  const newPw=document.getElementById('fNewPw').value;
+  if(!answerVal){showLoginErr('Please enter your answer.');return}
+  if(!newPw||newPw.length<6){showLoginErr('New password must be at least 6 characters.');return}
+  try{await authResetPassword(idx,answerVal,newPw);showToast('Password reset! Please login.','success');showLogin('login')}
+  catch(e){showLoginErr(e.message)}
+}
+function bootApp(){
+  const s=getSession();if(!s)return;
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('appShell').classList.remove('hidden');
+  document.getElementById('islandAvatar').textContent=s.initials;
+  const imAv=document.getElementById('imAvatar');if(imAv)imAv.textContent=s.initials;
+  const imNm=document.getElementById('imName');if(imNm)imNm.textContent=s.username;
+  updateClock();setInterval(updateClock,60000);
+  spawnParticles();updateFinBar();nav('dashboard');
+}
+
+/* 
+   DASHBOARD
+ */
+function renderDashboard(){
+  const s=getSession();const a=DB.analytics();const d=DB.get();const c=DB.totalCost();
+  const h=new Date().getHours();
+  document.getElementById('timeGreet').textContent=h<12?'morning':h<17?'afternoon':'evening';
+  document.getElementById('heroName').textContent=s?.username||'Commander';
+  document.getElementById('heroDate').textContent=new Date().toLocaleDateString('en-KE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const quotes=['Discipline is choosing between what you want now and what you want most.','A dream written down with a date becomes a goal.','Small daily improvements lead to stunning long-term results.','Your future is created by what you do today, not tomorrow.','Success is the sum of small efforts repeated daily.'];
+  document.getElementById('heroQuote').textContent=quotes[new Date().getDay()%quotes.length];
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card d1"><div class="stat-label">Total Items</div><div class="stat-val blue">${a.total}</div><div class="stat-sub">${a.pending} pending</div></div>
+    <div class="stat-card d2"><div class="stat-label">Completion</div><div class="stat-val ${a.rate>=50?'green':'pink'}">${a.rate}%</div><div class="stat-sub ${a.rate>=50?'up':'down'}">${a.rate>=50?' On track':' Keep going'}</div></div>
+    <div class="stat-card d3"><div class="stat-label">Grand Total Cost</div><div class="stat-val gold">${kesShort(c.total)}</div><div class="stat-sub">All targets</div></div>
+    <div class="stat-card d4"><div class="stat-label">Top Streak</div><div class="stat-val blue">${a.topStreak}<span style="font-size:16px;color:var(--warning)"> </span></div><div class="stat-sub">${d.habits.length} habits</div></div>
+  `;
+  const all=[...d.goals.map(x=>({...x,_type:'goal'})),...d.dreams.map(x=>({...x,_type:'dream'}))];
+  const buckets={overdue:[],short:[],long:[],future:[]};
+  all.forEach(item=>{if(!item.achieved){const cls=DB.classify(item.targetDate);if(buckets[cls])buckets[cls].push(item)}});
+  document.getElementById('dashTotalItems').textContent=`${all.length} items · ${all.filter(x=>x.achieved).length} achieved`;
+  const secs=[{key:'overdue',label:'Overdue',cls:'tl-overdue',icon:''},{key:'short',label:'Short-Term (0-6 months)',cls:'tl-short',icon:''},{key:'long',label:'Long-Term (6m-3yr)',cls:'tl-long',icon:''},{key:'future',label:'The Future (3+ years)',cls:'tl-future',icon:''}];
+  let html='';secs.forEach(sec=>{const items=buckets[sec.key];if(!items.length)return;html+=`<div style="margin-bottom:24px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="tl-label ${sec.cls}">${sec.icon} ${sec.label}</span><span class="tl-count">${items.length} items</span></div><div class="items-scroll">${items.map((item,i)=>miniItemCard(item,i)).join('')}</div></div>`});
+  if(!all.length)html=`<div class="empty"><span class="empty-icon"></span><div class="empty-text">Your journey begins here.<br>Add a goal or dream to get started.</div></div>`;
+  document.getElementById('dashTimeline').innerHTML=html;
+  const tips=suggestions();
+  document.getElementById('dashSuggestions').innerHTML=tips.length?tips.map((t,i)=>`<div class="suggest-item d${i+1}"><span class="suggest-icon">${t.icon}</span><div class="suggest-text">${t.txt}</div></div>`).join(''):'<div class="text-muted text-sm">You\'re doing great! Keep building </div>';
+}
+function miniItemCard(item,i){const c=cat(item.category);return`<div class="item-card ${item.achieved?'achieved':''}" style="animation-delay:${i*.06}s"><div class="card-top"><div class="cat-icon" style="background:${c.bg}">${c.icon}</div><div style="flex:1;min-width:0"><div class="card-title">${esc(item.title)}</div><div class="card-cat">${c.label}</div></div></div><div class="card-footer"><div><div class="card-price">${item.price?kes(item.price):'—'}</div><div class="card-date"> ${fmtDate(item.targetDate)}</div></div><div>${item.achieved?'<span class="done-badge">Done</span>':cdHTML(item.targetDate)}</div></div></div>`}
+
+/* 
+   GOALS
+ */
+let goalFilter='all',editGoalId='';
+function setGoalFilter(f,btn){goalFilter=f;document.querySelectorAll('#goalFilterTabs .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGoals()}
+function renderGoals(){
+  const d=DB.get();let items=[...d.goals];
+  if(goalFilter==='achieved')items=items.filter(x=>x.achieved);
+  else if(goalFilter==='overdue')items=items.filter(x=>!x.achieved&&DB.classify(x.targetDate)==='overdue');
+  else if(goalFilter!=='all')items=items.filter(x=>!x.achieved&&DB.classify(x.targetDate)===goalFilter);
+  items.sort((a,b)=>{if(a.achieved!==b.achieved)return a.achieved?1:-1;if(!a.targetDate)return 1;if(!b.targetDate)return-1;return new Date(a.targetDate)-new Date(b.targetDate)});
+  const grid=document.getElementById('goalsGrid');
+  if(!items.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><span class="empty-icon"></span><div class="empty-text">No goals here yet.<br>Start by adding your first goal!</div></div>`;return}
+  grid.innerHTML=items.map((g,i)=>goalCard(g,i)).join('')
+}
+function goalCard(g,i){const c=cat(g.category);const cls=DB.classify(g.targetDate);const tlMap={short:'tl-short',long:'tl-long',future:'tl-future',overdue:'tl-overdue'};const pri={high:'',medium:'',low:''};return`<div class="item-card ${g.achieved?'achieved':''}" style="animation-delay:${i*.06}s"><div class="card-top"><div class="cat-icon" style="background:${c.bg}">${c.icon}</div><div style="flex:1;min-width:0"><div class="card-title">${esc(g.title)}</div><div class="card-cat">${c.label} · ${pri[g.priority]||''} ${g.priority||'medium'}</div></div><div class="card-actions">${!g.achieved?`<button class="btn btn-success btn-icon btn-sm" onclick="markGoalDone('${g.id}')"></button>`:''}<button class="btn btn-ghost btn-icon btn-sm" onclick="editGoal('${g.id}')"></button><button class="btn btn-danger btn-icon btn-sm" onclick="delGoal('${g.id}')"></button></div></div>${g.description?`<div class="card-desc">${esc(g.description)}</div>`:''}${g.notes?`<div class="card-desc text-xs" style="color:var(--text-3)"> ${esc(g.notes)}</div>`:''}${cls?`<span class="tl-label ${tlMap[cls]||''}" style="font-size:8px;padding:3px 10px;display:inline-flex;margin-bottom:8px">${cls.toUpperCase()}</span>`:''}<div class="card-footer"><div><div class="card-price">${g.price?kes(g.price):'No price set'}</div><div class="card-date"> ${fmtDate(g.targetDate)}</div></div><div>${g.achieved?'<span class="done-badge">Achieved</span>':cdHTML(g.targetDate)}</div></div></div>`}
+// Shared image upload helper
+let _drawerImg=null;
+function _imgUploadHTML(existing){return `<div class="form-group"><label class="form-label" style="letter-spacing:.18em">Cover Image (Optional)</label><div style="position:relative;display:inline-block;margin-bottom:${existing?'10px':'0'}""><input type="file" accept="image/*" id="imgFileInput" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="handleDrawerImg(this)"/><button class="btn btn-ghost" style="pointer-events:none;padding:10px 20px;font-size:13px;border-radius:var(--radius-p)">◫ Upload Image</button></div>${existing?`<div style="position:relative;margin-top:8px"><img id="imgUpPrev" src="${existing}" style="width:100%;max-height:180px;border-radius:var(--radius-m);object-fit:cover;display:block"/><button class="btn btn-danger btn-sm" style="position:absolute;top:8px;right:8px" onclick="event.preventDefault();_drawerImg=null;this.parentElement.style.display='none'">Remove</button></div>`:`<div id="imgUpPrev" style="display:none;position:relative;margin-top:8px"><img class="imgUpPrevImg" style="width:100%;max-height:180px;border-radius:var(--radius-m);object-fit:cover;display:block"/><button class="btn btn-danger btn-sm" style="position:absolute;top:8px;right:8px" onclick="event.preventDefault();_drawerImg=null;document.getElementById('imgUpPrev').style.display='none'">Remove</button></div>`}</div>`}
+function handleDrawerImg(input){const file=input.files[0];if(!file)return;if(file.size>4*1024*1024){showToast('Max 4MB','error');return}const r=new FileReader();r.onload=e=>{_drawerImg=e.target.result;const wrap=document.getElementById('imgUpPrev');if(wrap){const img=wrap.tagName==='IMG'?wrap:wrap.querySelector('.imgUpPrevImg');if(img){img.src=_drawerImg}wrap.style.display='block'}};r.readAsDataURL(file)}
+function viewImgFull2(src,title){const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px;flex-direction:column;gap:12px';o.innerHTML=`<img src="${src}" style="max-width:90vw;max-height:80vh;border-radius:12px;object-fit:contain"/><div style="color:rgba(255,255,255,.7);font-size:15px">${title}</div>`;o.onclick=()=>o.remove();document.body.appendChild(o)}
+
+function openGoalDrawer(id){
+  editGoalId=id||'';_drawerImg=null;const _g0=id?DB.get().goals.find(x=>x.id===id):null;if(_g0?.image)_drawerImg=_g0.image;
+  const g=id?DB.get().goals.find(x=>x.id===id):null;
+  document.getElementById('drawerTitle').textContent=id?'Edit Goal':'+ New Goal';
+  document.getElementById('drawerBody').innerHTML=`
+    ${_imgUploadHTML(_g0?.image||null)}
+    <div class="form-group"><label class="form-label">Goal Title *</label><input type="text" id="fTitle" class="form-control" placeholder="e.g. Launch my business" value="${esc(g?.title||'')}"/></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea id="fDesc" class="form-control">${esc(g?.description||'')}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select id="fCat" class="form-control">${['personal','business','education','health','travel','finance','other'].map(v=>`<option value="${v}" ${g?.category===v?'selected':''}>${cat(v).icon} ${cat(v).label}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select id="fPriority" class="form-control"><option value="high" ${g?.priority==='high'||!g?'selected':''}> High</option><option value="medium" ${g?.priority==='medium'?'selected':''}> Medium</option><option value="low" ${g?.priority==='low'?'selected':''}> Low</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Target Price (KES)</label><input type="number" id="fPrice" class="form-control" placeholder="0" value="${g?.price||''}"/></div>
+      <div class="form-group"><label class="form-label">Target Date</label><input type="date" id="fDate" class="form-control" value="${g?.targetDate||''}"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes / Action Steps</label><textarea id="fNotes" class="form-control" placeholder="First step I will take...">${esc(g?.notes||'')}</textarea></div>
+    <button class="btn btn-primary w-full" onclick="saveGoal()">Save Goal</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>
+  `;openDrawer()
+}
+function editGoal(id){openGoalDrawer(id)}
+function saveGoal(){const title=document.getElementById('fTitle').value.trim();if(!title){showToast('Please enter a goal title','error');return}const data={title,description:document.getElementById('fDesc').value.trim(),category:document.getElementById('fCat').value,priority:document.getElementById('fPriority').value,price:document.getElementById('fPrice').value||null,targetDate:document.getElementById('fDate').value||null,notes:document.getElementById('fNotes').value.trim(),image:_drawerImg};if(editGoalId){DB.updateGoal(editGoalId,data);showToast('Goal updated!','success')}else{DB.addGoal(data);showToast('Goal added!','success')}closeDrawer();updateFinBar();renderGoals()}
+function markGoalDone(id){DB.achieveGoal(id);showToast('Goal achieved!','success');updateFinBar();renderGoals()}
+function delGoal(id){if(confirm('Delete this goal?')){DB.deleteGoal(id);updateFinBar();renderGoals();showToast('Goal deleted','info')}}
+
+/* 
+   DREAMS
+ */
+let dreamFilter='all',editDreamId='';
+function setDreamFilter(f,btn){dreamFilter=f;document.querySelectorAll('#dreamFilterTabs .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderDreams()}
+function renderDreams(){
+  const d=DB.get();let items=[...d.dreams];
+  if(dreamFilter==='achieved')items=items.filter(x=>x.achieved);
+  else if(dreamFilter==='overdue')items=items.filter(x=>!x.achieved&&DB.classify(x.targetDate)==='overdue');
+  else if(dreamFilter!=='all')items=items.filter(x=>!x.achieved&&DB.classify(x.targetDate)===dreamFilter);
+  items.sort((a,b)=>{if(a.achieved!==b.achieved)return a.achieved?1:-1;if(!a.targetDate)return 1;if(!b.targetDate)return-1;return new Date(a.targetDate)-new Date(b.targetDate)});
+  const total=d.dreams.filter(x=>!x.achieved).reduce((s,x)=>s+(parseFloat(x.price)||0),0);
+  document.getElementById('dreamTotalCost').textContent=kes(total);
+  document.getElementById('dreamCountText').textContent=`${d.dreams.length} dreams · ${d.dreams.filter(x=>x.achieved).length} achieved`;
+  const grid=document.getElementById('dreamsGrid');
+  if(!items.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><span class="empty-icon"></span><div class="empty-text">No dreams yet.<br>Dream big — add your first dream!</div></div>`;return}
+  grid.innerHTML=items.map((g,i)=>dreamCard(g,i)).join('')
+}
+function dreamCard(g,i){const c=cat(g.category);const cls=DB.classify(g.targetDate);const tlMap={short:'tl-short',long:'tl-long',future:'tl-future',overdue:'tl-overdue'};return`<div class="item-card ${g.achieved?'achieved':''}" style="animation-delay:${i*.06}s">${g.image?`<img src="${g.image}" style="width:calc(100% + 40px);height:150px;object-fit:cover;border-radius:12px 12px 0 0;margin:-18px -20px 14px;display:block;cursor:zoom-in" onclick="viewImgFull2('${g.image}','${esc(g.title)}')" alt="${esc(g.title)}"/>`:''}<div class="card-top"><div class="cat-icon" style="background:${c.bg}">${c.icon}</div><div style="flex:1;min-width:0"><div class="card-title">${esc(g.title)}</div><div class="card-cat">${c.label}</div></div></div>${g.spec?`<div class="badge badge-blue mb8">${esc(g.spec)}</div>`:''} ${g.description?`<div class="card-desc">${esc(g.description)}</div>`:''}${cls?`<span class="tl-label ${tlMap[cls]||''}" style="font-size:8px;padding:3px 10px;display:inline-flex;margin-bottom:8px">${cls.toUpperCase()}</span>`:''}<div class="card-footer"><div><div class="card-price">${g.price?kes(g.price):'Price TBD'}</div><div class="card-date"> ${fmtDate(g.targetDate)}</div></div><div>${g.achieved?'<span class="done-badge">Done</span>':cdHTML(g.targetDate)}</div></div><div class="divider" style="margin:10px 0 8px"></div><div class="flex-c gap6">${!g.achieved?`<button class="btn btn-success btn-sm" onclick="markDreamDone('${g.id}')">Mark Done</button>`:''}<button class="btn btn-ghost btn-sm" onclick="editDream('${g.id}')"> Edit</button><button class="btn btn-danger btn-sm" onclick="delDream('${g.id}')"></button></div></div>`}
+function openDreamDrawer(id){
+  editDreamId=id||'';_drawerImg=null;const g=id?DB.get().dreams.find(x=>x.id===id):null;
+  document.getElementById('drawerTitle').textContent=id?'Edit Dream':'New Dream';
+  document.getElementById('drawerBody').innerHTML=`
+    \${_imgUploadHTML(g?.image||null)}
+    <div class="form-group"><label class="form-label">Dream Title *</label><input type="text" id="fTitle" class="form-control" placeholder="e.g. Own a Mercedes C300" value="${esc(g?.title||'')}"/></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea id="fDesc" class="form-control">${esc(g?.description||'')}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select id="fCat" class="form-control">${['car','house','land','furniture','electronics','fashion','investment','holiday','other'].map(v=>`<option value="${v}" ${g?.category===v?'selected':''}>${cat(v).icon} ${cat(v).label}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select id="fPriority" class="form-control"><option value="high" ${!g||g.priority==='high'?'selected':''}> High</option><option value="medium" ${g?.priority==='medium'?'selected':''}> Medium</option><option value="low" ${g?.priority==='low'?'selected':''}> Low</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Estimated Price (KES)</label><input type="number" id="fPrice" class="form-control" placeholder="0" value="${g?.price||''}"/></div>
+      <div class="form-group"><label class="form-label">Target Date</label><input type="date" id="fDate" class="form-control" value="${g?.targetDate||''}"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Specific Model / Brand / Location</label><input type="text" id="fSpec" class="form-control" placeholder="e.g. 2025 Mercedes C300 AMG, White" value="${esc(g?.spec||'')}"/></div>
+    <div class="form-group"><label class="form-label">My Plan To Achieve This</label><textarea id="fNotes" class="form-control">${esc(g?.notes||'')}</textarea></div>
+    <button class="btn btn-pink w-full" onclick="saveDream()"> Save Dream</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>
+  `;openDrawer()
+}
+function editDream(id){openDreamDrawer(id)}
+function saveDream(){const title=document.getElementById('fTitle').value.trim();if(!title){showToast('Please enter a dream title','error');return}const data={title,description:document.getElementById('fDesc').value.trim(),category:document.getElementById('fCat').value,priority:document.getElementById('fPriority').value,price:document.getElementById('fPrice').value||null,targetDate:document.getElementById('fDate').value||null,spec:document.getElementById('fSpec').value.trim(),notes:document.getElementById('fNotes').value.trim(),image:_drawerImg};if(editDreamId){DB.updateDream(editDreamId,data);showToast('Dream updated!','success')}else{DB.addDream(data);showToast('Dream added! ','success')}closeDrawer();updateFinBar();renderDreams()}
+function markDreamDone(id){DB.achieveDream(id);showToast('Dream achieved!','success');updateFinBar();renderDreams()}
+function delDream(id){if(confirm('Delete this dream?')){DB.deleteDream(id);updateFinBar();renderDreams();showToast('Dream deleted','info')}}
+
+/* 
+   SHOPPING
+ */
+let shopFilter='all',editShopId='';
+function setShopFilter(f,el){shopFilter=f;document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderShopping()}
+function renderShopping(){
+  const d=DB.get();let items=[...d.shopping];
+  const total=items.reduce((s,x)=>s+(parseFloat(x.price)||0)*(parseInt(x.qty)||1),0);
+  const bought=items.filter(x=>x.purchased).reduce((s,x)=>s+(parseFloat(x.price)||0)*(parseInt(x.qty)||1),0);
+  const pending=items.filter(x=>!x.purchased).reduce((s,x)=>s+(parseFloat(x.price)||0)*(parseInt(x.qty)||1),0);
+  document.getElementById('shopStats').innerHTML=`<div class="stat-card"><div class="stat-label">Total Items</div><div class="stat-val blue">${items.length}</div><div class="stat-sub">${items.filter(x=>x.purchased).length} purchased</div></div><div class="stat-card"><div class="stat-label">Pending Cost</div><div class="stat-val gold">${kesShort(pending)}</div><div class="stat-sub">Yet to buy</div></div><div class="stat-card"><div class="stat-label">Already Spent</div><div class="stat-val pink">${kesShort(bought)}</div><div class="stat-sub">Purchased</div></div><div class="stat-card"><div class="stat-label">Grand Total</div><div class="stat-val blue">${kesShort(total)}</div><div class="stat-sub">All items</div></div>`;
+  if(shopFilter==='bought')items=items.filter(x=>x.purchased);
+  else if(shopFilter!=='all')items=items.filter(x=>x.category===shopFilter&&!x.purchased);
+  else items=items;
+  const priOrder={urgent:0,normal:1,later:2};
+  items.sort((a,b)=>{if(a.purchased!==b.purchased)return a.purchased?1:-1;return(priOrder[a.priority]||1)-(priOrder[b.priority]||1)});
+  const list=document.getElementById('shopList');
+  if(!items.length){list.innerHTML=`<div class="empty"><span class="empty-icon"></span><div class="empty-text">Nothing here.<br>Add items to your shopping list!</div></div>`;return}
+  const priLabels={urgent:' Urgent',normal:' Normal',later:' Later'};
+  const priColors={urgent:'var(--danger)',normal:'var(--warning)',later:'var(--success)'};
+  if(shopFilter==='bought'){list.innerHTML=`<div class="flex-col gap8">${items.map((x,i)=>shopItemHTML(x,i,priColors)).join('')}</div>`;return}
+  let html='';['urgent','normal','later'].forEach(p=>{const grp=items.filter(x=>!x.purchased&&(x.priority||'normal')===p);if(!grp.length)return;html+=`<div style="margin-bottom:20px"><div class="shop-section-hdr"><span>${priLabels[p]}</span><span>${grp.length} items · ${kesShort(grp.reduce((s,x)=>s+(parseFloat(x.price)||0)*(parseInt(x.qty)||1),0))}</span></div><div class="flex-col gap8">${grp.map((x,i)=>shopItemHTML(x,i,priColors)).join('')}</div></div>`});
+  const boughtItems=items.filter(x=>x.purchased);if(boughtItems.length)html+=`<div style="margin-bottom:20px"><div class="shop-section-hdr"><span> Purchased</span><span>${boughtItems.length} items</span></div><div class="flex-col gap8">${boughtItems.map((x,i)=>shopItemHTML(x,i,priColors)).join('')}</div></div>`;
+  list.innerHTML=html
+}
+function shopItemHTML(x,i,priColors){const c=cat(x.category);return`<div class="shop-item ${x.purchased?'bought':''}" style="animation-delay:${i*.04}s;flex-wrap:wrap">${x.image?`<img src="${x.image}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;cursor:zoom-in;flex-shrink:0" onclick="viewImgFull2('${x.image}','${esc(x.name)}')" alt="${esc(x.name)}"/>`:''}<div class="priority-dot" style="background:${priColors[x.priority]||priColors.normal}"></div><div class="shop-check ${x.purchased?'checked':''}" onclick="toggleShop('${x.id}')">${x.purchased?'':''}</div><span style="font-size:18px">${c.icon}</span><div style="flex:1;min-width:0"><div class="shop-name">${esc(x.name)}</div><div class="text-xs text-muted">${c.label}${x.store?' · '+esc(x.store):''}</div></div><div class="shop-qty">×${x.qty||1}</div><div class="shop-price">${x.price?kesShort((x.price||0)*(x.qty||1)):'—'}</div><button class="btn btn-ghost btn-icon btn-sm" onclick="editShop('${x.id}')"></button><button class="btn btn-danger btn-icon btn-sm" onclick="delShop('${x.id}')"></button></div>`}
+function openShopDrawer(id){
+  editShopId=id||'';_drawerImg=null;const x=id?DB.get().shopping.find(s=>s.id===id):null;
+  document.getElementById('drawerTitle').textContent=id?'Edit Item':'Add Item';
+  document.getElementById('drawerBody').innerHTML=`
+    \${_imgUploadHTML(x?.image||null)}
+    <div class="form-group"><label class="form-label">Item Name *</label><input type="text" id="fName" class="form-control" placeholder="e.g. Unga 2kg, Cooking Oil" value="${esc(x?.name||'')}"/></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select id="fCat" class="form-control">${['food','household','care','clothing','tech','other'].map(v=>`<option value="${v}" ${x?.category===v?'selected':''}>${cat(v).icon} ${cat(v).label}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select id="fPriority" class="form-control"><option value="urgent" ${x?.priority==='urgent'?'selected':''}> Urgent</option><option value="normal" ${!x||x.priority==='normal'?'selected':''}> Normal</option><option value="later" ${x?.priority==='later'?'selected':''}> Later</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (KES)</label><input type="number" id="fPrice" class="form-control" placeholder="0" value="${x?.price||''}"/></div>
+      <div class="form-group"><label class="form-label">Quantity</label><input type="number" id="fQty" class="form-control" value="${x?.qty||1}" min="1"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Store / Where to Buy</label><input type="text" id="fStore" class="form-control" placeholder="e.g. Naivas, Carrefour" value="${esc(x?.store||'')}"/></div>
+    <button class="btn btn-primary w-full" onclick="saveShop()">Save Item</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>
+  `;openDrawer()
+}
+function editShop(id){openShopDrawer(id)}
+function saveShop(){const name=document.getElementById('fName').value.trim();if(!name){showToast('Please enter an item name','error');return}const data={name,category:document.getElementById('fCat').value,priority:document.getElementById('fPriority').value,price:document.getElementById('fPrice').value||null,qty:document.getElementById('fQty').value||1,store:document.getElementById('fStore').value.trim(),image:_drawerImg};if(editShopId){const d=DB.get();const i=d.shopping.findIndex(x=>x.id===editShopId);if(i>-1){d.shopping[i]={...d.shopping[i],...data};DB.save(d)}showToast('Item updated!','success')}else{DB.addShop(data);showToast('Item added!','success')}closeDrawer();updateFinBar();renderShopping()}
+function toggleShop(id){DB.toggleShop(id);updateFinBar();renderShopping()}
+function delShop(id){if(confirm('Delete this item?')){DB.deleteShop(id);updateFinBar();renderShopping();showToast('Deleted','info')}}
+function clearPurchased(){if(confirm('Remove all purchased items?')){const d=DB.get();d.shopping=d.shopping.filter(x=>!x.purchased);DB.save(d);updateFinBar();renderShopping();showToast('Cleared','info')}}
+
+/* 
+   FINANCE
+ */
+const ALLOC_DEFS=[
+  {key:'savings',label:' Savings',color:'#0047FF'},{key:'rent',label:' Rent/Housing',color:'#FF0080'},
+  {key:'food',label:' Food',color:'#00e07a'},{key:'transport',label:' Transport',color:'#FFD700'},
+  {key:'entertainment',label:' Entertainment',color:'#6690ff'},{key:'invest',label:' Investment/SACCO',color:'#ff66b0'},
+  {key:'other',label:' Miscellaneous',color:'rgba(255,255,255,.5)'}
+];
+function renderFinance(){
+  const d=DB.get();const sal=d.salary;
+  _salType=sal.salType||'monthly';document.getElementById(sal.salType==='weekly'?'salTypeWeekly':'salTypeMonthly')?.classList.add('sel');document.getElementById(sal.salType==='weekly'?'salTypeMonthly':'salTypeWeekly')?.classList.remove('sel');
+  document.getElementById('salaryInput').value=sal.inputAmount||sal.monthly||'';
+  document.getElementById('bigSalary').textContent=kes(sal.monthly||0);
+  if(sal.monthly)updateSalaryCalcs(sal.monthly);
+  renderAllocRows(sal.alloc||{});
+  updateDonut2(sal.alloc||{},sal.monthly||0);
+  renderGoalTimeline(sal.monthly||0);
+}
+function onSalaryChange(){const v=getMonthly();const raw=parseFloat(document.getElementById('salaryInput').value)||0;const isWk=_salType==='weekly';document.getElementById('bigSalary').textContent=kes(v)+(isWk?' /mo equiv':'');updateSalaryCalcs(v);updateAllocKES(v);updateDonut2(getCurrentAlloc(),v);renderGoalTimeline(v)}
+let _salType='monthly';function setSalType(t,el){_salType=t;document.querySelectorAll('#salTypeMonthly,#salTypeWeekly').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');onSalaryChange()}function getMonthly(){const v=parseFloat(document.getElementById('salaryInput').value)||0;return _salType==='weekly'?v*4.33:v}function updateSalaryCalcs(m){const raw=parseFloat(document.getElementById('salaryInput').value)||0;const isWk=_salType==='weekly';document.getElementById('dailyBudget').textContent=kesShort(m/30);document.getElementById('weeklyBudget').textContent=isWk?kesShort(raw)+' /wk':kesShort(m)+' /mo';document.getElementById('annualSalary').textContent=kesShort(m*12)}
+function getCurrentAlloc(){const a={};ALLOC_DEFS.forEach(d=>{const el=document.getElementById('fin_sl_'+d.key);a[d.key]=el?parseInt(el.value)||0:0});return a}
+function renderAllocRows(alloc){const raw=parseFloat(document.getElementById('salaryInput').value)||0;const isWk=_salType==='weekly';const m=getMonthly();const displayAmt=isWk?raw:m;const lbl=isWk?'/wk':'/mo';document.getElementById('allocRows').innerHTML=ALLOC_DEFS.map(def=>{const pct=alloc[def.key]||0;const amt=displayAmt*pct/100;return`<div class="alloc-row"><div class="alloc-label"><span style="width:10px;height:10px;background:${def.color};border-radius:3px;display:inline-block;flex-shrink:0"></span>${def.label}</div><input type="range" class="alloc-slider" id="fin_sl_${def.key}" min="0" max="80" value="${pct}" oninput="onSlider('${def.key}',this)"/><span class="alloc-pct-disp" id="fin_pct_${def.key}">${pct}%</span><span class="alloc-kes-disp" id="fin_kes_${def.key}">${kesShort(amt)}<span style="font-size:10px;color:var(--text-3)">${lbl}</span></span></div>`}).join('');checkAllocTotal()}
+function onSlider(key,el){const v=parseInt(el.value)||0,m=getMonthly();const raw=parseFloat(document.getElementById('salaryInput').value)||0;const isWk=_salType==='weekly';const display=isWk?raw:m;const lbl=isWk?'/wk':'/mo';document.getElementById('fin_pct_'+key).textContent=v+'%';const ksEl=document.getElementById('fin_kes_'+key);if(ksEl)ksEl.innerHTML=kesShort(display*v/100)+'<span style="font-size:10px;color:var(--text-3)">'+lbl+'</span>';checkAllocTotal();updateDonut2(getCurrentAlloc(),m)}
+function updateAllocKES(m){const raw=parseFloat(document.getElementById('salaryInput').value)||0;const isWk=_salType==='weekly';const display=isWk?raw:m;const lbl=isWk?'/wk':'/mo';ALLOC_DEFS.forEach(def=>{const el=document.getElementById('fin_sl_'+def.key);if(!el)return;const v=parseInt(el.value)||0;const k=document.getElementById('fin_kes_'+def.key);if(k)k.innerHTML=kesShort(display*v/100)+'<span style="font-size:10px;color:var(--text-3)">'+lbl+'</span>'})}
+function checkAllocTotal(){const t=ALLOC_DEFS.reduce((s,d)=>{const el=document.getElementById('fin_sl_'+d.key);return s+(el?parseInt(el.value)||0:0)},0);document.getElementById('allocWarn').style.display=t>100?'block':'none';document.getElementById('allocOk').style.display=t<=100?'block':'none';const el=document.getElementById('allocTotal');if(el)el.textContent=t}
+function updateDonut2(alloc,monthly){const canvas=document.getElementById('donutCanvas');drawDonut(canvas,ALLOC_DEFS.map(d=>d.label),ALLOC_DEFS.map(d=>alloc[d.key]||0),ALLOC_DEFS.map(d=>d.color));const legend=document.getElementById('donutLegend');legend.innerHTML=ALLOC_DEFS.map((def)=>{const pct=alloc[def.key]||0;return`<div class="legend-row"><div class="legend-dot" style="background:${def.color}"></div><span class="text-sm">${def.label}</span><span class="legend-pct">${pct}% · ${kesShort(monthly*pct/100)}</span></div>`}).join('')}
+function renderGoalTimeline(monthly){const d=DB.get();const allItems=[...d.goals.filter(g=>!g.achieved&&g.price),...d.dreams.filter(g=>!g.achieved&&g.price)];const wrap=document.getElementById('goalTimeline');if(!allItems.length){wrap.innerHTML='<div class="text-muted text-sm">Add priced goals or dreams to see savings timeline.</div>';return}const savingsPct=(getCurrentAlloc().savings||20)/100;const ms=monthly*savingsPct;wrap.innerHTML=allItems.map((item,i)=>{const price=parseFloat(item.price)||0;const months=ms>0?Math.ceil(price/ms):null;const pct=months?Math.min(100,Math.round(1/months*100)):0;const c=cat(item.category);return`<div style="margin-bottom:16px;animation-delay:${i*.06}s"><div class="flex-b mb4"><span class="text-sm fw6">${c.icon} ${esc(item.title)}</span><span class="text-gold fam-m text-sm">${kes(price)}</span></div><div class="flex-b mb4"><span class="text-muted text-xs">${months?`~${months} months at ${kesShort(ms)}/mo saved`:'Set salary & savings % first'}</span><span class="text-muted text-xs">${item.targetDate?fmtDate(item.targetDate):''}</span></div><div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div></div>`}).join('')}
+function saveSalary(){const inputAmount=parseFloat(document.getElementById('salaryInput').value)||0;const monthly=getMonthly();DB.updateSalary({monthly,inputAmount,salType:_salType,alloc:getCurrentAlloc()});showToast('Saved!','success')}
+
+/* 
+   HABITS
+ */
+const HABIT_EMOJIS=['','','','','','','','','','','','','','','','','','','',''];
+let selEmoji='',selFreqVal='daily',editHabitId='';
+document.getElementById('todayDateLbl').textContent=new Date().toLocaleDateString('en-KE',{weekday:'long',month:'short',day:'numeric'});
+function renderHabits(){
+  const d=DB.get();const today=new Date().toDateString();
+  const todayDone=d.habits.filter(h=>h.logs&&h.logs.includes(today)).length;
+  const topStreak=d.habits.reduce((m,h)=>Math.max(m,h.streak||0),0);
+  const totalLogs=d.habits.reduce((s,h)=>s+(h.logs?h.logs.length:0),0);
+  document.getElementById('todayPct').textContent=d.habits.length?`${todayDone}/${d.habits.length} done today`:'';
+  document.getElementById('habitStats').innerHTML=`<div class="stat-card d1"><div class="stat-label">Active Habits</div><div class="stat-val blue">${d.habits.length}</div><div class="stat-sub">${todayDone} done today</div></div><div class="stat-card d2"><div class="stat-label">Top Streak</div><div class="stat-val gold">${topStreak} </div><div class="stat-sub">consecutive days</div></div><div class="stat-card d3"><div class="stat-label">Total Logs</div><div class="stat-val green">${totalLogs}</div><div class="stat-sub">all time</div></div><div class="stat-card d4"><div class="stat-label">Avg Streak</div><div class="stat-val pink">${d.habits.length?Math.round(d.habits.reduce((s,h)=>s+(h.streak||0),0)/d.habits.length):0}</div><div class="stat-sub">days avg</div></div>`;
+  const grid=document.getElementById('habitGrid');
+  if(!d.habits.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><span class="empty-icon"></span><div class="empty-text">No habits yet.<br>Start with one simple habit!</div></div>`;renderHeatmap([]);return}
+  grid.innerHTML=d.habits.map((h,i)=>habitCardHTML(h,i)).join('');
+  renderHeatmap(d.habits);
+}
+function habitCardHTML(h,i){const today=new Date().toDateString();const doneToday=h.logs&&h.logs.includes(today);const week=getLast7();const weekDots=week.map(day=>{const done=h.logs&&h.logs.includes(day.ds);return`<div class="wd${done?' done':''}" title="${day.label}">${done?'':''}<span>${day.lbl}</span></div>`}).join('');const rate=h.logs&&h.logs.length?Math.min(100,Math.round(h.logs.length/Math.max(1,Math.ceil((Date.now()-new Date(h.createdAt))/864e5))*100)):0;return`<div class="habit-card${doneToday?' done-today':''}" style="animation-delay:${i*.07}s"><div class="flex-b mb8"><div class="flex-c gap10"><span style="font-size:28px">${h.emoji||''}</span><div><div class="fw7" style="font-size:15px">${esc(h.name)}</div><div class="text-muted text-xs">${h.frequency||'daily'}</div></div></div><div class="flex-c gap4"><span style="font-size:18px">${h.streak>0?h.streak+'':''}</span><button class="btn btn-ghost btn-icon btn-sm" onclick="editHabit('${h.id}')"></button><button class="btn btn-danger btn-icon btn-sm" onclick="delHabit('${h.id}')"></button></div></div>${h.why?`<div class="card-desc">${esc(h.why)}</div>`:''}<div class="week-dots">${weekDots}</div><div class="progress"><div class="progress-fill" style="width:${rate}%"></div></div><div class="flex-b" style="margin:4px 0"><span class="text-muted text-xs">Consistency</span><span class="text-muted text-xs">${rate}%</span></div><button class="log-btn${doneToday?' undo':''}" onclick="${doneToday?`unlogHabit('${h.id}')`:`logHabit('${h.id}')`}">${doneToday?'↩ Undo Today':' Mark Done Today'}</button></div>`}
+function getLast7(){const days=[];const lbls=['Su','Mo','Tu','We','Th','Fr','Sa'];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push({ds:d.toDateString(),label:d.toLocaleDateString('en-KE',{weekday:'short',month:'short',day:'numeric'}),lbl:lbls[d.getDay()]})}return days}
+function renderHeatmap(habits){const wrap=document.getElementById('heatmapCard');if(!habits.length){wrap.innerHTML='<div class="text-muted text-sm">Add habits to see your heatmap.</div>';return}const cells=[];for(let i=89;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toDateString();const count=habits.filter(h=>h.logs&&h.logs.includes(ds)).length;const level=count===0?'':count<=1?'l1':count<=2?'l2':'l3';cells.push(`<div class="hm-cell${level?' '+level:''}" title="${d.toLocaleDateString('en-KE',{month:'short',day:'numeric'})}: ${count}"></div>`)}wrap.innerHTML=`<div class="flex-b mb10"><span class="text-muted text-xs">Last 90 days</span><div class="flex-c gap4"><div class="hm-cell"></div><span class="text-muted text-xs">0</span><div class="hm-cell l1"></div><span class="text-muted text-xs">1</span><div class="hm-cell l2"></div><span class="text-muted text-xs">2</span><div class="hm-cell l3"></div><span class="text-muted text-xs">3+</span></div></div><div class="heatmap-row">${cells.join('')}</div>`}
+function logHabit(id){DB.logHabit(id);showToast('Habit logged!','success');renderHabits()}
+function unlogHabit(id){DB.unlogHabit(id);showToast('Habit unlogged','info');renderHabits()}
+function openHabitDrawer(id){
+  editHabitId=id||'';_drawerImg=null;const h=id?DB.get().habits.find(x=>x.id===id):null;
+  selEmoji=h?.emoji||'';selFreqVal=h?.frequency||'daily';
+  document.getElementById('drawerTitle').textContent=id?'Edit Habit':' New Habit';
+  document.getElementById('drawerBody').innerHTML=`
+    \${_imgUploadHTML(h?.image||null)}
+    <div class="form-group"><label class="form-label">Habit Name *</label><input type="text" id="fHName" class="form-control" placeholder="e.g. Morning Workout, Read 20 Pages" value="${esc(h?.name||'')}"/></div>
+    <div class="form-group"><label class="form-label">Choose Icon</label><div class="emoji-picker">${HABIT_EMOJIS.map(e=>`<div class="emoji-opt${e===selEmoji?' sel':''}" onclick="pickHabitEmoji('${e}',this)">${e}</div>`).join('')}</div></div>
+    <div class="form-group"><label class="form-label">Frequency</label><div class="flex-c gap8 flex-wrap">${['daily','weekdays','weekly','custom'].map(f=>`<div class="freq-opt${selFreqVal===f?' sel':''}" onclick="pickHabitFreq('${f}',this)">${f.charAt(0).toUpperCase()+f.slice(1)}</div>`).join('')}</div></div>
+    <div class="form-group"><label class="form-label">Why This Habit?</label><textarea id="fHWhy" class="form-control" placeholder="My motivation...">${esc(h?.why||'')}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Target (per week)</label><input type="number" id="fHTarget" class="form-control" value="${h?.target||7}" min="1" max="7"/></div>
+      <div class="form-group"><label class="form-label">Reminder Time</label><input type="time" id="fHTime" class="form-control" value="${h?.reminder||''}"/></div>
+    </div>
+    <button class="btn btn-primary w-full" onclick="saveHabit()">Save Habit</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>
+  `;openDrawer()
+}
+function pickHabitEmoji(e,el){document.querySelectorAll('.emoji-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');selEmoji=e}
+function pickHabitFreq(f,el){selFreqVal=f;document.querySelectorAll('.freq-opt').forEach(x=>x.classList.remove('sel'));el.classList.add('sel')}
+function editHabit(id){openHabitDrawer(id)}
+function saveHabit(){const name=document.getElementById('fHName').value.trim();if(!name){showToast('Please enter a habit name','error');return}const data={name,emoji:selEmoji,frequency:selFreqVal,why:document.getElementById('fHWhy').value.trim(),target:parseInt(document.getElementById('fHTarget').value)||7,reminder:document.getElementById('fHTime').value,image:_drawerImg};if(editHabitId){const d=DB.get();const i=d.habits.findIndex(x=>x.id===editHabitId);if(i>-1){d.habits[i]={...d.habits[i],...data};DB.save(d)}showToast('Habit updated!','success')}else{DB.addHabit(data);showToast('Habit created! ','success')}closeDrawer();renderHabits()}
+function delHabit(id){if(confirm('Delete this habit and all its logs?')){DB.deleteHabit(id);renderHabits();showToast('Habit deleted','info')}}
+
+/* 
+   ANALYTICS
+ */
+let analyticsPeriod='week';
+function setAnalyticsPeriod(p,btn){analyticsPeriod=p;document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderAnalytics()}
+function renderAnalytics(){
+  const d=DB.get();const a=DB.analytics();const c=DB.totalCost();
+  document.getElementById('heroRate').textContent=a.rate+'%';
+  const circ=301.6;setTimeout(()=>{const rf=document.getElementById('ringFill');if(rf)rf.style.strokeDashoffset=circ-(circ*a.rate/100)},100);
+  document.getElementById('heroStats').innerHTML=`<div><div class="stat-label">Achieved</div><div class="stat-val green" style="font-size:26px">${a.achieved}</div></div><div><div class="stat-label">Pending</div><div class="stat-val blue" style="font-size:26px">${a.pending}</div></div><div><div class="stat-label">Total Cost</div><div class="stat-val gold" style="font-size:22px">${kesShort(c.total)}</div></div><div><div class="stat-label">Habits</div><div class="stat-val pink" style="font-size:26px">${d.habits.length}</div></div>`;
+  const cutoff=analyticsPeriod==='week'?new Date(Date.now()-7*864e5):analyticsPeriod==='month'?new Date(Date.now()-30*864e5):analyticsPeriod==='year'?new Date(Date.now()-365*864e5):new Date(0);
+  const all=[...d.goals,...d.dreams];
+  const achPer=all.filter(x=>x.achieved&&x.achievedAt&&new Date(x.achievedAt)>cutoff).length;
+  const addPer=[...d.goals,...d.dreams,...d.shopping,...d.habits].filter(x=>x.createdAt&&new Date(x.createdAt)>cutoff).length;
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  document.getElementById('analyticsStats').innerHTML=`<div class="stat-card d1"><div class="stat-label">Achieved This ${cap(analyticsPeriod)}</div><div class="stat-val green">${achPer}</div><div class="stat-sub up"> Completed</div></div><div class="stat-card d2"><div class="stat-label">Added This ${cap(analyticsPeriod)}</div><div class="stat-val blue">${addPer}</div><div class="stat-sub">New items</div></div><div class="stat-card d3"><div class="stat-label">Top Streak</div><div class="stat-val gold">${a.topStreak}</div><div class="stat-sub">consecutive days</div></div><div class="stat-card d4"><div class="stat-label">Months to Goals</div><div class="stat-val pink">${a.monthsNeeded||'—'}</div><div class="stat-sub">${a.monthsNeeded?'at current salary':'Set salary first'}</div></div>`;
+  // Cat breakdown
+  const counts={};all.forEach(x=>{counts[x.category]=(counts[x.category]||0)+1});const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);const max=sorted[0]?sorted[0][1]:1;const colors=['#0047FF','#FF0080','#00e07a','#FFD700','#6690ff','#ff66b0'];
+  document.getElementById('catBreakdown').innerHTML=sorted.length?sorted.map(([k,v],i)=>{const c=cat(k);return`<div class="cb-row"><span class="cb-lbl">${c.icon} ${c.label}</span><div class="cb-bar-wrap"><div class="cb-bar" style="width:${Math.round(v/max*100)}%;background:${colors[i%6]}"></div></div><span class="cb-pct">${v}</span></div>`}).join(''):'<div class="text-muted text-sm">No data yet.</div>';
+  // Cost chart
+  const bkts={short:0,long:0,future:0,overdue:0};all.filter(x=>!x.achieved).forEach(x=>{const cl=DB.classify(x.targetDate);if(bkts[cl]!==undefined)bkts[cl]+=(parseFloat(x.price)||0)});const cc=document.getElementById('costCanvas');cc.width=cc.parentElement.offsetWidth||300;drawBar(cc,['Short','Long-Term','Future','Overdue'],[bkts.short,bkts.long,bkts.future,bkts.overdue].map(v=>Math.round(v/1000)),'rgba(0,71,255,.85)');
+  // Activity chart
+  const albl=[],aval=[];for(let w=7;w>=0;w--){const st=new Date(Date.now()-(w*7+7)*864e5),en=new Date(Date.now()-w*7*864e5);const ach=all.filter(x=>x.achieved&&x.achievedAt&&new Date(x.achievedAt)>st&&new Date(x.achievedAt)<=en).length;const hLogs=d.habits.reduce((s,h)=>s+(h.logs||[]).filter(l=>{const ld=new Date(l);return ld>st&&ld<=en}).length,0);albl.push(`W${8-w}`);aval.push(ach+Math.round(hLogs/Math.max(1,d.habits.length)))}const ac=document.getElementById('activityCanvas');ac.width=ac.parentElement.offsetWidth||300;drawBar(ac,albl,aval,'rgba(255,0,128,.8)');
+  // Dist donut
+  if(a.total>0)drawDonut(document.getElementById('distCanvas'),['Achieved','Pending'],[a.achieved,a.pending],['#00e07a','rgba(0,71,255,.6)']);
+  // Achievements
+  const achs=all.filter(x=>x.achieved).sort((a,b)=>new Date(b.achievedAt)-new Date(a.achievedAt)).slice(0,8);document.getElementById('achieveList').innerHTML=achs.length?achs.map((x,i)=>{const c=cat(x.category);return`<div class="achieve-item" style="animation-delay:${i*.06}s"><span style="font-size:22px">${c.icon}</span><div style="flex:1"><div class="fw6 text-sm">${esc(x.title)}</div><div class="text-muted text-xs">Achieved ${fmtDate(x.achievedAt)}</div></div>${x.price?`<span class="text-gold fam-m text-sm">${kesShort(x.price)}</span>`:''}<span class="done-badge"></span></div>`}).join(''):'<div class="text-muted text-sm">No achievements yet — keep going! </div>';
+  // Pros/Cons
+  const pros=[],cons=[];
+  if(a.achieved>0)pros.push(`You've achieved ${a.achieved} goal${a.achieved!==1?'s':''}!`);
+  if(a.topStreak>=7)pros.push(`${a.topStreak}-day habit streak shows real discipline.`);
+  if(d.salary.monthly>0)pros.push('You\'re planning your finances — a huge advantage.');
+  if(d.habits.length>=3)pros.push(`Tracking ${d.habits.length} habits builds compounding results.`);
+  if(!pros.length)pros.push('Start adding goals and dreams to build your progress story.');
+  if(a.pending>8)cons.push(`${a.pending} pending items. Focus on 3 at a time.`);
+  if(a.rate<30&&a.total>2)cons.push(`${a.rate}% completion. Smaller milestones help.`);
+  if(d.salary.monthly===0)cons.push('No salary set. Financial planning is key.');
+  if(!d.habits.length)cons.push('No habits tracked. Daily routines are the foundation.');
+  if(!cons.length)cons.push('No major blockers — keep pushing forward!');
+  document.getElementById('prosList').innerHTML=pros.map(p=>`<div class="pc-item"><span style="color:var(--success);flex-shrink:0"></span>${p}</div>`).join('');
+  document.getElementById('consList').innerHTML=cons.map(p=>`<div class="pc-item"><span style="color:var(--danger);flex-shrink:0"></span>${p}</div>`).join('');
+  const tips=suggestions();document.getElementById('analyticssuggestions').innerHTML=tips.length?tips.map((t,i)=>`<div class="suggest-item" style="animation-delay:${i*.08}s"><span class="suggest-icon">${t.icon}</span><div class="suggest-text">${t.txt}</div></div>`).join(''):`<div class="suggest-item"><span class="suggest-icon"></span><div class="suggest-text">You're on track! Keep going.</div></div>`;
+  window.addEventListener('resize',()=>{const cc2=document.getElementById('costCanvas');if(cc2){cc2.width=cc2.parentElement.offsetWidth||300;drawBar(cc2,['Short','Long-Term','Future','Overdue'],[bkts.short,bkts.long,bkts.future,bkts.overdue].map(v=>Math.round(v/1000)),'rgba(0,71,255,.85)')}})
+}
+
+/* 
+   SERVICE WORKER (inline blob)
+ */
+if('serviceWorker' in navigator){
+  const swCode=`
+    const CACHE='nexus-v3';
+    self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])).then(()=>self.skipWaiting()))});
+    self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+    self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res&&res.status===200){const cl=res.clone();caches.open(CACHE).then(c=>c.put(e.request,cl))}return res})))});
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const swURL=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swURL).catch(()=>{});
+}
+
+/* ═══════════════════════════════════════════
+   VISION BOARD (IMAGES)
+═══════════════════════════════════════════ */
+let imgFilter='all', imgPreviewData=null;
+const IMG_CATS={dream:'Dream',goal:'Goal',product:'Product',receipt:'Receipt',inspiration:'Inspiration'};
+
+function setImgFilter(f,el){imgFilter=f;document.querySelectorAll('#imgCatFilter .cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderImages()}
+
+function renderImages(){
+  const d=DB.get(); let items=(d.images||[]);
+  if(imgFilter==='all'){}
+  else items=items.filter(x=>x.category===imgFilter);
+  items=[...items].reverse();
+  const grid=document.getElementById('imagesGrid');
+  if(!items.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><span class="empty-icon">◫</span><div class="empty-text">No images yet.<br>Add photos of your dream car, house, products or receipts.</div></div>`;return}
+  grid.innerHTML=items.map((img,i)=>`
+    <div class="img-card" style="animation-delay:${i*.05}s">
+      ${img.data
+        ?`<img class="img-thumb" src="${img.data}" alt="${esc(img.title)}" onclick="viewImgFull('${img.id}')" style="cursor:zoom-in"/>`
+        :`<div class="img-thumb-placeholder">◫</div>`}
+      <div class="img-info">
+        <div class="img-title">${esc(img.title)}</div>
+        ${img.note?`<div style="font-size:11px;color:var(--text-2);margin-bottom:6px">${esc(img.note)}</div>`:''}
+        <div class="img-meta">
+          <span class="img-tag">${IMG_CATS[img.category]||img.category}</span>
+          <div class="flex-c gap6">
+            <button class="btn btn-danger btn-icon btn-sm" onclick="delImage('${img.id}')">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openImageDrawer(){
+  imgPreviewData=null;
+  document.getElementById('drawerTitle').textContent='◫ Add Image';
+  document.getElementById('drawerBody').innerHTML=`
+    <div class="form-group"><label class="form-label">Title *</label>
+      <input type="text" id="imgTitle" class="form-control" placeholder="e.g. My Dream Mercedes GLE, Omo Detergent"/></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select id="imgCat" class="form-control">
+        <option value="dream">Dream (Car, House...)</option>
+        <option value="goal">Goal</option>
+        <option value="product">Product / Shopping</option>
+        <option value="receipt">Receipt / Expense</option>
+        <option value="inspiration">Inspiration</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Upload Photo</label>
+      <div class="img-upload-area" id="uploadArea">
+        <input type="file" accept="image/*" onchange="handleImgUpload(this)"/>
+        <div id="uploadPrompt" style="pointer-events:none">
+          <div style="font-size:32px;margin-bottom:8px">◫</div>
+          <div style="font-size:13px;font-weight:600">Tap to choose a photo</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:4px">JPG, PNG, WEBP</div>
+        </div>
+        <img id="imgPreviewEl" class="img-preview"/>
+      </div></div>
+    <div class="form-group"><label class="form-label">Note (optional)</label>
+      <textarea id="imgNote" class="form-control" placeholder="e.g. 2025 model, Matt black, from AutoKenya..."></textarea></div>
+    <button class="btn btn-primary w-full" onclick="saveImage()">Save Image</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>`;
+  openDrawer();
+}
+
+function handleImgUpload(input){
+  const file=input.files[0]; if(!file)return;
+  if(file.size>4*1024*1024){showToast('Image too large. Max 4MB.','error');return}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    imgPreviewData=e.target.result;
+    const prev=document.getElementById('imgPreviewEl');
+    const prompt=document.getElementById('uploadPrompt');
+    if(prev){prev.src=imgPreviewData;prev.style.display='block'}
+    if(prompt)prompt.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveImage(){
+  const title=(document.getElementById('imgTitle')?.value||'').trim();
+  if(!title){showToast('Please enter a title','error');return}
+  DB.addImage({title,category:document.getElementById('imgCat').value,note:(document.getElementById('imgNote')?.value||'').trim(),data:imgPreviewData});
+  closeDrawer();renderImages();showToast('Image saved!','success');
+}
+
+function viewImgFull(id){
+  const d=DB.get(); const img=(d.images||[]).find(x=>x.id===id); if(!img||!img.data)return;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px';
+  overlay.innerHTML=`<div style="max-width:90vw;max-height:90vh;position:relative">
+    <img src="${img.data}" style="max-width:100%;max-height:90vh;border-radius:12px;display:block;box-shadow:0 32px 80px rgba(0,0,0,.8)"/>
+    <div style="position:absolute;bottom:-36px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font-size:13px">${esc(img.title)}</div>
+  </div>`;
+  overlay.onclick=()=>overlay.remove();
+  document.body.appendChild(overlay);
+}
+
+function delImage(id){if(confirm('Delete this image?')){DB.deleteImage(id);renderImages();showToast('Deleted','info')}}
+
+/* ═══════════════════════════════════════════
+   SAVED LINKS
+═══════════════════════════════════════════ */
+let linkFilter='all';
+function setLinkFilter(f,el){linkFilter=f;document.querySelectorAll('#linkCatFilter .cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderLinks()}
+
+function renderLinks(){
+  const d=DB.get(); let items=(d.links||[]);
+  if(linkFilter==='unread') items=items.filter(x=>!x.read);
+  else if(linkFilter!=='all') items=items.filter(x=>x.category===linkFilter);
+  items=[...items].reverse();
+  const grid=document.getElementById('linksGrid');
+  if(!items.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><span class="empty-icon">⊟</span><div class="empty-text">No saved links yet.<br>Save any website, article or video you want to revisit.</div></div>`;return}
+  grid.innerHTML=items.map((lnk,i)=>`
+    <div class="link-card ${lnk.read?'read':''}" style="animation-delay:${i*.05}s">
+      <div class="flex-c gap8 mb6">
+        ${!lnk.read?'<div class="unread-dot"></div>':''}
+        <span class="badge badge-blue" style="font-size:9px">${lnk.category||'other'}</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="toggleRead('${lnk.id}')" title="${lnk.read?'Mark unread':'Mark read'}">${lnk.read?'↩':'✓'}</button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="delLink('${lnk.id}')">✕</button>
+        </div>
+      </div>
+      <div class="link-title">${esc(lnk.title)}</div>
+      ${lnk.note?`<div class="link-note">${esc(lnk.note)}</div>`:''}
+      <div class="link-url" onclick="openLink('${esc(lnk.url)}')">${esc(lnk.url)}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="openLink('${esc(lnk.url)}')">Open Link</button>
+        <span style="font-size:10px;color:var(--text-3);align-self:center">${fmtDate(lnk.createdAt)}</span>
+      </div>
+    </div>`).join('');
+}
+
+function openLink(url){
+  const u=url.startsWith('http')?url:'https://'+url;
+  window.open(u,'_blank','noopener,noreferrer');
+}
+
+function openLinkDrawer(){
+  document.getElementById('drawerTitle').textContent='⊟ Save a Link';
+  document.getElementById('drawerBody').innerHTML=`
+    <div class="form-group"><label class="form-label">URL / Website *</label>
+      <input type="url" id="lnkUrl" class="form-control" placeholder="https://... or paste any link"/></div>
+    <div class="form-group"><label class="form-label">Title *</label>
+      <input type="text" id="lnkTitle" class="form-control" placeholder="e.g. Good website about investing"/></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select id="lnkCat" class="form-control">
+        <option value="website">Website</option>
+        <option value="shopping">Shopping</option>
+        <option value="article">Article</option>
+        <option value="video">Video</option>
+        <option value="other">Other</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Note (why you saved it)</label>
+      <textarea id="lnkNote" class="form-control" placeholder="e.g. Saw this on Instagram, looks like a good deal..."></textarea></div>
+    <button class="btn btn-primary w-full" onclick="saveLink()">Save Link</button>
+    <button class="btn btn-ghost w-full" onclick="closeDrawer()">Cancel</button>`;
+  openDrawer();
+}
+
+function saveLink(){
+  const url=(document.getElementById('lnkUrl')?.value||'').trim();
+  const title=(document.getElementById('lnkTitle')?.value||'').trim();
+  if(!url){showToast('Please enter a URL','error');return}
+  if(!title){showToast('Please enter a title','error');return}
+  DB.addLink({url,title,category:document.getElementById('lnkCat').value,note:(document.getElementById('lnkNote')?.value||'').trim()});
+  closeDrawer();renderLinks();showToast('Link saved!','success');
+}
+
+function toggleRead(id){DB.toggleLinkRead(id);renderLinks()}
+function delLink(id){if(confirm('Delete this link?')){DB.deleteLink(id);renderLinks();showToast('Deleted','info')}}
+
+/* 
+   INIT
+ */
+spawnParticles();
+const _s=getSession();
+if(_s){
+  bootApp();
+} else {
+  document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('loginPage').style.display='block';
+  // Pre-fill username if remembered
+  const _rem=localStorage.getItem(REMEMBER_KEY);
+  if(_rem){
+    const uEl=document.getElementById('lUsername');
+    if(uEl)uEl.value=_rem;
+    document.getElementById('rememberMe').checked=true;
+  }
+  showLogin('login');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('loginPage').style.display!=='none'){
+    const lv=!document.getElementById('loginForm').classList.contains('hidden');
+    const rv=!document.getElementById('registerForm').classList.contains('hidden');
+    if(lv)doLogin();else if(rv)doRegister();
+  }
+});
+</script>
+</body>
+</html>
